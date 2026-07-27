@@ -1,0 +1,6 @@
+@Elevating.Api_HostAddress = http://localhost:5029
+
+GET {{Elevating.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
