@@ -3,6 +3,7 @@ using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Interfaces.Services;
 using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
+
 using Microsoft.Extensions.Logging;
 
 namespace Elevating.Application.Services;
@@ -15,7 +16,13 @@ public sealed class GoalService(
     public async Task<IReadOnlyList<GoalDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Retrieving all goals.");
+
         var goals = await goalRepository.GetAllAsync(cancellationToken);
+
+        logger.LogInformation(
+       "Retrieved {GoalCount} goals.",
+       goals.Count);
 
         return goals
             .Select(MapToDto)
@@ -39,6 +46,11 @@ public sealed class GoalService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        logger.LogInformation(
+    "Creating goal '{Title}' in category '{Category}'.",
+    request.Title,
+    request.Category);
+
         var now = DateTime.UtcNow;
 
         var goal = new Goal
@@ -56,6 +68,10 @@ public sealed class GoalService(
         await goalRepository.AddAsync(goal, cancellationToken);
         await goalRepository.SaveChangesAsync(cancellationToken);
 
+        logger.LogInformation(
+    "Goal {GoalId} created successfully.",
+    goal.Id);
+
         return MapToDto(goal);
     }
 
@@ -66,10 +82,17 @@ public sealed class GoalService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        logger.LogInformation(
+    "Updating goal {GoalId}.",
+    id);
+
         var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
 
         if (goal is null)
         {
+            logger.LogWarning(
+       "Goal {GoalId} was not found.",
+       id);
             return false;
         }
 
@@ -83,6 +106,10 @@ public sealed class GoalService(
 
         await goalRepository.SaveChangesAsync(cancellationToken);
 
+        logger.LogInformation(
+    "Goal {GoalId} updated successfully.",
+    id);
+
         return true;
     }
 
@@ -90,10 +117,18 @@ public sealed class GoalService(
         int id,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation(
+       "Completing goal {GoalId}.",
+       id);
+
         var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
 
         if (goal is null)
         {
+            logger.LogWarning(
+           "Goal {GoalId} was not found.",
+           id);
+
             return false;
         }
 
@@ -102,6 +137,10 @@ public sealed class GoalService(
 
         await goalRepository.SaveChangesAsync(cancellationToken);
 
+        logger.LogInformation(
+      "Goal {GoalId} completed successfully.",
+      id);
+
         return true;
     }
 
@@ -109,15 +148,27 @@ public sealed class GoalService(
         int id,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation(
+        "Deleting goal {GoalId}.",
+        id);
+
         var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
 
         if (goal is null)
         {
+            logger.LogWarning(
+            "Goal {GoalId} was not found.",
+            id);
+
             return false;
         }
 
         goalRepository.Remove(goal);
         await goalRepository.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(
+       "Goal {GoalId} deleted successfully.",
+       id);
 
         return true;
     }
