@@ -2,6 +2,7 @@
 using Elevating.Application.Interfaces.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Elevating.Application.Common.Pagination;
 
 namespace Elevating.Api.Controllers;
 
@@ -15,14 +16,20 @@ public sealed class GoalsController(
 {
     [HttpGet]
     [ProducesResponseType(
-        typeof(IReadOnlyList<GoalDto>),
+        typeof(PagedResult<GoalDto>),
         StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<GoalDto>>> GetAll(
+    [ProducesResponseType(
+        typeof(ValidationProblemDetails),
+        StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PagedResult<GoalDto>>> GetAll(
+        [FromQuery] PaginationRequest pagination,
         CancellationToken cancellationToken)
     {
-        var goals = await goalService.GetAllAsync(cancellationToken);
+        var result = await goalService.GetPagedAsync(
+            pagination,
+            cancellationToken);
 
-        return Ok(goals);
+        return Ok(result);
     }
 
     [HttpGet("{id:int}")]

@@ -1,10 +1,12 @@
 ﻿using Elevating.Application.DTOs.Goals;
+using Elevating.Application.Common.Pagination;
 
 namespace Elevating.Application.Interfaces.Services;
 
 public interface IGoalService
 {
-    Task<IReadOnlyList<GoalDto>> GetAllAsync(
+    Task<PagedResult<GoalDto>> GetPagedAsync(
+        PaginationRequest pagination,
         CancellationToken cancellationToken = default);
 
     Task<GoalDto?> GetByIdAsync(

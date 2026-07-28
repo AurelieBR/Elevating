@@ -3,7 +3,7 @@ using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Interfaces.Services;
 using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
-
+using Elevating.Application.Common.Pagination;
 using Microsoft.Extensions.Logging;
 
 namespace Elevating.Application.Services;
@@ -13,20 +13,36 @@ public sealed class GoalService(
     ILogger<GoalService> logger)
     : IGoalService
 {
-    public async Task<IReadOnlyList<GoalDto>> GetAllAsync(
-        CancellationToken cancellationToken = default)
+    public async Task<PagedResult<GoalDto>> GetPagedAsync(
+     PaginationRequest pagination,
+     CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Retrieving all goals.");
-
-        var goals = await goalRepository.GetAllAsync(cancellationToken);
+        ArgumentNullException.ThrowIfNull(pagination);
 
         logger.LogInformation(
-       "Retrieved {GoalCount} goals.",
-       goals.Count);
+            "Retrieving goals page {PageNumber} with page size {PageSize}.",
+            pagination.PageNumber,
+            pagination.PageSize);
 
-        return goals
+        var result = await goalRepository.GetPagedAsync(
+            pagination.PageNumber,
+            pagination.PageSize,
+            cancellationToken);
+
+        var items = result.Items
             .Select(MapToDto)
             .ToList();
+
+        logger.LogInformation(
+            "Retrieved {GoalCount} goals from {TotalCount} total goals.",
+            items.Count,
+            result.TotalCount);
+
+        return new PagedResult<GoalDto>(
+            items,
+            pagination.PageNumber,
+            pagination.PageSize,
+            result.TotalCount);
     }
 
     public async Task<GoalDto?> GetByIdAsync(

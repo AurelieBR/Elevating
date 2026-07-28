@@ -8,16 +8,29 @@ namespace Elevating.Infrastructure.Repositories;
 public sealed class GoalRepository(AppDbContext dbContext)
     : IGoalRepository
 {
-    public async Task<IReadOnlyList<Goal>> GetAllAsync(
+    public async Task<(IReadOnlyList<Goal> Items, int TotalCount)>
+    GetPagedAsync(
+        int pageNumber,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Goals
-            .AsNoTracking()
+        var query = dbContext.Goals
+            .AsNoTracking();
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
             .OrderBy(goal => goal.Status)
             .ThenByDescending(goal => goal.Priority)
             .ThenBy(goal => goal.TargetDate)
+            .ThenBy(goal => goal.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
+   
 
     public Task<Goal?> GetByIdAsync(
         int id,

@@ -4,8 +4,11 @@ namespace Elevating.Application.Interfaces.Repositories;
 
 public interface IGoalRepository
 {
-    Task<IReadOnlyList<Goal>> GetAllAsync(
-        CancellationToken cancellationToken = default);
+
+    Task<(IReadOnlyList<Goal> Items, int TotalCount)> GetPagedAsync(
+    int pageNumber,
+    int pageSize,
+    CancellationToken cancellationToken = default);
 
     Task<Goal?> GetByIdAsync(
         int id,
