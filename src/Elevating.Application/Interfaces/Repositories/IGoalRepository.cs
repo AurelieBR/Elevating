@@ -1,14 +1,13 @@
 ﻿using Elevating.Domain.Entities;
+using Elevating.Application.Common.Queries;
 
 namespace Elevating.Application.Interfaces.Repositories;
 
 public interface IGoalRepository
 {
-
     Task<(IReadOnlyList<Goal> Items, int TotalCount)> GetPagedAsync(
-    int pageNumber,
-    int pageSize,
-    CancellationToken cancellationToken = default);
+        GoalQueryParameters parameters,
+        CancellationToken cancellationToken = default);
 
     Task<Goal?> GetByIdAsync(
         int id,

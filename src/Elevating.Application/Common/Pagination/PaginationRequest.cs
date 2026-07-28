@@ -2,7 +2,7 @@
 
 namespace Elevating.Application.Common.Pagination;
 
-public sealed class PaginationRequest
+public class PaginationRequest
 {
     [Range(1, int.MaxValue)]
     public int PageNumber { get; init; } = 1;

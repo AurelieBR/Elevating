@@ -5,6 +5,7 @@ using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
 using Elevating.Application.Common.Pagination;
 using Microsoft.Extensions.Logging;
+using Elevating.Application.Common.Queries;
 
 namespace Elevating.Application.Services;
 
@@ -14,19 +15,26 @@ public sealed class GoalService(
     : IGoalService
 {
     public async Task<PagedResult<GoalDto>> GetPagedAsync(
-     PaginationRequest pagination,
-     CancellationToken cancellationToken = default)
+    GoalQueryParameters parameters,
+    CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(pagination);
+        ArgumentNullException.ThrowIfNull(parameters);
 
         logger.LogInformation(
-            "Retrieving goals page {PageNumber} with page size {PageSize}.",
-            pagination.PageNumber,
-            pagination.PageSize);
+            """
+        Retrieving goals page {PageNumber} with page size {PageSize}.
+        Filters: Status={Status}, Priority={Priority},
+        Category={Category}, Search={Search}.
+        """,
+            parameters.PageNumber,
+            parameters.PageSize,
+            parameters.Status,
+            parameters.Priority,
+            parameters.Category,
+            parameters.Search);
 
         var result = await goalRepository.GetPagedAsync(
-            pagination.PageNumber,
-            pagination.PageSize,
+            parameters,
             cancellationToken);
 
         var items = result.Items
@@ -34,14 +42,14 @@ public sealed class GoalService(
             .ToList();
 
         logger.LogInformation(
-            "Retrieved {GoalCount} goals from {TotalCount} total goals.",
+            "Retrieved {GoalCount} goals from {TotalCount} matching goals.",
             items.Count,
             result.TotalCount);
 
         return new PagedResult<GoalDto>(
             items,
-            pagination.PageNumber,
-            pagination.PageSize,
+            parameters.PageNumber,
+            parameters.PageSize,
             result.TotalCount);
     }
 

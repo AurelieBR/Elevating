@@ -1,8 +1,11 @@
-﻿using Elevating.Application.DTOs.Goals;
+﻿using Elevating.Application.Common.Pagination;
+using Elevating.Application.Common.Queries;
+using Elevating.Application.DTOs.Goals;
 using Elevating.Application.Interfaces.Services;
+
 using FluentValidation;
+
 using Microsoft.AspNetCore.Mvc;
-using Elevating.Application.Common.Pagination;
 
 namespace Elevating.Api.Controllers;
 
@@ -22,11 +25,11 @@ public sealed class GoalsController(
         typeof(ValidationProblemDetails),
         StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PagedResult<GoalDto>>> GetAll(
-        [FromQuery] PaginationRequest pagination,
-        CancellationToken cancellationToken)
+    [FromQuery] GoalQueryParameters parameters,
+    CancellationToken cancellationToken)
     {
         var result = await goalService.GetPagedAsync(
-            pagination,
+            parameters,
             cancellationToken);
 
         return Ok(result);
