@@ -1,1 +1,130 @@
-<p>goal-filters works!</p>
+<section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+  <div class="grid gap-4 lg:grid-cols-4">
+    <div class="lg:col-span-2">
+      <label for="goal-search" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Search
+      </label>
+
+      <input
+        id="goal-search"
+        type="search"
+        [formControl]="form.controls.search"
+        placeholder="Search titles or descriptions..."
+        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      />
+    </div>
+
+    <div>
+      <label for="goal-category" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Category
+      </label>
+
+      <input
+        id="goal-category"
+        type="text"
+        [formControl]="form.controls.category"
+        placeholder="Development"
+        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      />
+    </div>
+
+    <div>
+      <label for="goal-status" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Status
+      </label>
+
+      <select
+        id="goal-status"
+        [formControl]="form.controls.status"
+        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      >
+        <option [ngValue]="null">All statuses</option>
+
+        @for (status of statuses; track status.value) {
+          <option [ngValue]="status.value">
+            {{ status.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="goal-priority" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Priority
+      </label>
+
+      <select
+        id="goal-priority"
+        [formControl]="form.controls.priority"
+        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      >
+        <option [ngValue]="null">All priorities</option>
+
+        @for (priority of priorities; track priority.value) {
+          <option [ngValue]="priority.value">
+            {{ priority.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="goal-sort" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Sort by
+      </label>
+
+      <select
+        id="goal-sort"
+        [formControl]="form.controls.sortBy"
+        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      >
+        @for (field of sortFields; track field.value) {
+          <option [ngValue]="field.value">
+            {{ field.label }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="goal-direction" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Direction
+      </label>
+
+      <select
+        id="goal-direction"
+        [formControl]="form.controls.sortDirection"
+        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      >
+        <option [ngValue]="0">Ascending</option>
+        <option [ngValue]="1">Descending</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="goal-page-size" class="mb-1.5 block text-sm font-medium text-slate-700">
+        Results per page
+      </label>
+
+      <select
+        id="goal-page-size"
+        [formControl]="form.controls.pageSize"
+        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+      >
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mt-4 flex justify-end">
+    <button
+      type="button"
+      (click)="reset()"
+      class="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+    >
+      Clear filters
+    </button>
+  </div>
+</section>
