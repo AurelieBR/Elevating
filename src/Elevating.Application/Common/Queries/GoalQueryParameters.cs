@@ -16,4 +16,9 @@ public sealed class GoalQueryParameters : PaginationRequest
 
     [StringLength(200)]
     public string? Search { get; init; }
+
+    public GoalSortBy? SortBy { get; init; }
+
+    public SortDirection SortDirection { get; init; }
+        = SortDirection.Ascending;
 }

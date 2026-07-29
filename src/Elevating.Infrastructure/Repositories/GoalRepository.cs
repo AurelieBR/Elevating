@@ -51,11 +51,9 @@ public sealed class GoalRepository(AppDbContext dbContext)
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .OrderBy(goal => goal.Status)
-            .ThenByDescending(goal => goal.Priority)
-            .ThenBy(goal => goal.TargetDate)
-            .ThenBy(goal => goal.Id)
+        var orderedQuery = ApplySorting(query, parameters);
+
+        var items = await orderedQuery
             .Skip((parameters.PageNumber - 1) * parameters.PageSize)
             .Take(parameters.PageSize)
             .ToListAsync(cancellationToken);
@@ -92,5 +90,88 @@ public sealed class GoalRepository(AppDbContext dbContext)
         CancellationToken cancellationToken = default)
     {
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static IOrderedQueryable<Goal> ApplySorting(
+    IQueryable<Goal> query,
+    GoalQueryParameters parameters)
+    {
+        if (!parameters.SortBy.HasValue)
+        {
+            return query
+                .OrderBy(goal => goal.Status)
+                .ThenByDescending(goal => goal.Priority)
+                .ThenBy(goal => goal.TargetDate)
+                .ThenBy(goal => goal.Id);
+        }
+
+        var orderedQuery = parameters.SortDirection
+            == SortDirection.Descending
+                ? ApplyDescendingSort(query, parameters.SortBy.Value)
+                : ApplyAscendingSort(query, parameters.SortBy.Value);
+
+        return orderedQuery.ThenBy(goal => goal.Id);
+    }
+
+    private static IOrderedQueryable<Goal> ApplyAscendingSort(
+        IQueryable<Goal> query,
+        GoalSortBy sortBy)
+    {
+        return sortBy switch
+        {
+            GoalSortBy.Title =>
+                query.OrderBy(goal => goal.Title),
+
+            GoalSortBy.Category =>
+                query.OrderBy(goal => goal.Category),
+
+            GoalSortBy.Priority =>
+                query.OrderBy(goal => goal.Priority),
+
+            GoalSortBy.Status =>
+                query.OrderBy(goal => goal.Status),
+
+            GoalSortBy.TargetDate =>
+                query.OrderBy(goal => goal.TargetDate),
+
+            GoalSortBy.CreatedDate =>
+                query.OrderBy(goal => goal.CreatedDate),
+
+            GoalSortBy.UpdatedDate =>
+                query.OrderBy(goal => goal.UpdatedDate),
+
+            _ => query.OrderBy(goal => goal.Id)
+        };
+    }
+
+    private static IOrderedQueryable<Goal> ApplyDescendingSort(
+        IQueryable<Goal> query,
+        GoalSortBy sortBy)
+    {
+        return sortBy switch
+        {
+            GoalSortBy.Title =>
+                query.OrderByDescending(goal => goal.Title),
+
+            GoalSortBy.Category =>
+                query.OrderByDescending(goal => goal.Category),
+
+            GoalSortBy.Priority =>
+                query.OrderByDescending(goal => goal.Priority),
+
+            GoalSortBy.Status =>
+                query.OrderByDescending(goal => goal.Status),
+
+            GoalSortBy.TargetDate =>
+                query.OrderByDescending(goal => goal.TargetDate),
+
+            GoalSortBy.CreatedDate =>
+                query.OrderByDescending(goal => goal.CreatedDate),
+
+            GoalSortBy.UpdatedDate =>
+                query.OrderByDescending(goal => goal.UpdatedDate),
+
+            _ => query.OrderByDescending(goal => goal.Id)
+        };
     }
 }

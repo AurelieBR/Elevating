@@ -21,17 +21,18 @@ public sealed class GoalService(
         ArgumentNullException.ThrowIfNull(parameters);
 
         logger.LogInformation(
-            """
-        Retrieving goals page {PageNumber} with page size {PageSize}.
-        Filters: Status={Status}, Priority={Priority},
-        Category={Category}, Search={Search}.
-        """,
+            "Retrieving goals page {PageNumber} with page size {PageSize}. " +
+            "Filters: Status={Status}, Priority={Priority}, " +
+            "Category={Category}, Search={Search}. " +
+            "Sorting: SortBy={SortBy}, SortDirection={SortDirection}.",
             parameters.PageNumber,
             parameters.PageSize,
             parameters.Status,
             parameters.Priority,
             parameters.Category,
-            parameters.Search);
+            parameters.Search,
+            parameters.SortBy,
+            parameters.SortDirection);
 
         var result = await goalRepository.GetPagedAsync(
             parameters,
