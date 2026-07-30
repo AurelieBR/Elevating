@@ -51,10 +51,10 @@ Elevating.Domain
 Elevating.Application
 Elevating.Infrastructure
 Elevating.Api
-
 ```
 
 The Angular application is organized by feature:
+
 ```text
 src/app/
 ├── core/
@@ -68,104 +68,117 @@ src/app/
         └── services/
 ```
 
-API Endpoints
-```text
-| Method | Endpoint                   | Description                   |
-| ------ | -------------------------- | ----------------------------- |
-| GET    | `/api/goals`               | Get a paginated list of goals |
-| GET    | `/api/goals/{id}`          | Get a goal by ID              |
-| POST   | `/api/goals`               | Create a goal                 |
-| PUT    | `/api/goals/{id}`          | Update a goal                 |
-| PATCH  | `/api/goals/{id}/complete` | Mark a goal as completed      |
-| DELETE | `/api/goals/{id}`          | Delete a goal                 |
-| GET    | `/api/health`              | Check the API status          |
+## API Endpoints
 
-
-```
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/goals` | Get a paginated list of goals |
+| GET | `/api/goals/{id}` | Get a goal by ID |
+| POST | `/api/goals` | Create a goal |
+| PUT | `/api/goals/{id}` | Update a goal |
+| PATCH | `/api/goals/{id}/complete` | Mark a goal as completed |
+| DELETE | `/api/goals/{id}` | Delete a goal |
+| GET | `/api/health` | Check the API status |
 
 ## Getting Started
 
-**Prerequisites**
+### Prerequisites
 
 Make sure the following tools are installed:
+
 - .NET SDK
 - Node.js
 - npm
 - SQL Server
-- Clone the Repository
 
-Clone the Repository
-```text
+### Clone the Repository
+
+```powershell
 git clone https://github.com/AurelieBR/Elevating.git
 cd Elevating
-Run the API
 ```
 
+### Run the API
+
 Navigate to the API project:
-```text
+
+```powershell
 cd src/Elevating.Api
 ```
 
 Apply the database migrations:
-```text
+
+```powershell
 dotnet ef database update
 ```
 
 Start the API using the HTTPS development profile:
 
-```text
+```powershell
 dotnet watch run --launch-profile https
 ```
 
 The API will be available at:
+
 ```text
 https://localhost:7269
 ```
 
 Swagger will be available at:
+
 ```text
 https://localhost:7269/swagger
 ```
 
-Run the Angular Application
+### Run the Angular Application
 
 Open another terminal and navigate to the Angular project:
-```text
+
+```powershell
 cd src/Elevating.Web
 ```
 
 Install the dependencies:
-```text
+
+```powershell
 npm install
 ```
 
 Start the development server:
-```text
+
+```powershell
 npm start
 ```
 
 The application will be available at:
+
 ```text
 http://localhost:4200
 ```
 
 ## Testing
-**Backend Tests**
+
+### Backend Tests
 
 From the repository root:
-```text
+
+```powershell
 dotnet test
 ```
 
-**Frontend Tests**
+### Frontend Tests
 
 From the Angular project:
-```text
+
+```powershell
 npm run test:run
 ```
 
-Frontend Build
-```text
+### Frontend Build
+
+From the Angular project:
+
+```powershell
 npm run build
 ```
 
@@ -181,7 +194,8 @@ The interface includes:
 - Loading, empty, and error states
 - Confirmation dialogs
 - Muted animations and transitions
-- Roadmap
+
+## Roadmap
 
 Possible future improvements include:
 
