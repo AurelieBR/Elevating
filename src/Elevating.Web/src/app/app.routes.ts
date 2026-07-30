@@ -16,17 +16,17 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'goals/:id/edit',
-    loadComponent: () =>
-      import('./features/goals/pages/goal-form/goal-form.component').then(
-        (module) => module.GoalForm,
-      ),
-  },
-  {
     path: 'goals/:id',
     loadComponent: () =>
       import('./features/goals/pages/goal-details/goal-details.component').then(
         (module) => module.GoalDetails,
+      ),
+  },
+  {
+    path: 'goals/:id/edit',
+    loadComponent: () =>
+      import('./features/goals/pages/goal-form/goal-form.component').then(
+        (module) => module.GoalForm,
       ),
   },
   {
