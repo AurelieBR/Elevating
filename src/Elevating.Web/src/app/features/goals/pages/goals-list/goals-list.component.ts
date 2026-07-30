@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -6,12 +13,15 @@ import { PagedResult } from '../../../../core/models/paged-result.model';
 import { GoalCard } from '../../components/goal-card/goal-card.component';
 import { GoalFilters } from '../../components/goal-filters/goal-filters.component';
 import { GoalPagination } from '../../components/goal-pagination/goal-pagination.component';
-import { Goal, GoalQueryParameters, SortDirection } from '../../models';
+import { Goal, GoalStatus, GoalQueryParameters, SortDirection } from '../../models';
 import { GoalsApi } from '../../services/goals-api.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DeleteGoalDialog } from '../../components/delete-goal-dialog/delete-goal-dialog.component';
 
 @Component({
   selector: 'app-goals-list',
-  imports: [RouterLink, GoalCard, GoalFilters, GoalPagination],
+  imports: [RouterLink, GoalCard, GoalFilters, GoalPagination, DeleteGoalDialog],
   templateUrl: './goals-list.component.html',
   styleUrl: './goals-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +39,19 @@ export class GoalsList implements OnInit {
     sortBy: 'createdDate',
     sortDirection: SortDirection.Descending,
   });
+
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly processingGoalId = signal<number | null>(null);
+  readonly selectedGoalForDeletion = signal<Goal | null>(null);
+  readonly deleting = signal(false);
+
+  readonly notification = signal<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+
+  private notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.loadGoals();
@@ -68,6 +91,7 @@ export class GoalsList implements OnInit {
     this.goalsApi
       .getAll(this.query())
       .pipe(
+        takeUntilDestroyed(this.destroyRef),
         finalize(() => {
           this.loading.set(false);
         }),
@@ -82,5 +106,137 @@ export class GoalsList implements OnInit {
           );
         },
       });
+  }
+
+  markComplete(goal: Goal): void {
+    if (goal.status === GoalStatus.Completed || this.processingGoalId() !== null) {
+      return;
+    }
+
+    this.processingGoalId.set(goal.id);
+    this.notification.set(null);
+
+    this.goalsApi
+      .complete(goal.id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.processingGoalId.set(null);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.showNotification('success', `“${goal.title}” was marked as completed.`);
+
+          this.loadGoals();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showNotification(
+            'error',
+            this.getActionError(error, 'The goal could not be marked as completed.'),
+          );
+        },
+      });
+  }
+
+  openDeleteDialog(goal: Goal): void {
+    if (this.processingGoalId() !== null) {
+      return;
+    }
+
+    this.selectedGoalForDeletion.set(goal);
+  }
+
+  closeDeleteDialog(): void {
+    if (!this.deleting()) {
+      this.selectedGoalForDeletion.set(null);
+    }
+  }
+
+  confirmDelete(): void {
+    const goal = this.selectedGoalForDeletion();
+
+    if (goal === null || this.deleting()) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.processingGoalId.set(goal.id);
+    this.notification.set(null);
+
+    this.goalsApi
+      .delete(goal.id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.deleting.set(false);
+          this.processingGoalId.set(null);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.selectedGoalForDeletion.set(null);
+
+          this.showNotification('success', `“${goal.title}” was deleted.`);
+
+          this.adjustPageAfterDeletion();
+          this.loadGoals();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.showNotification(
+            'error',
+            this.getActionError(error, 'The goal could not be deleted.'),
+          );
+        },
+      });
+  }
+
+  dismissNotification(): void {
+    this.notification.set(null);
+
+    if (this.notificationTimeout !== null) {
+      clearTimeout(this.notificationTimeout);
+      this.notificationTimeout = null;
+    }
+  }
+
+  private adjustPageAfterDeletion(): void {
+    const result = this.result();
+
+    if (result !== null && result.items.length === 1 && result.pageNumber > 1) {
+      this.query.update((query) => ({
+        ...query,
+        pageNumber: query.pageNumber - 1,
+      }));
+    }
+  }
+
+  private showNotification(type: 'success' | 'error', message: string): void {
+    this.dismissNotification();
+    this.notification.set({ type, message });
+
+    this.notificationTimeout = setTimeout(() => {
+      this.notification.set(null);
+      this.notificationTimeout = null;
+    }, 5000);
+  }
+
+  private getActionError(error: HttpErrorResponse, fallbackMessage: string): string {
+    if (error.status === 0) {
+      return 'The API could not be reached. Make sure it is running and try again.';
+    }
+
+    if (error.status === 404) {
+      return 'This goal no longer exists. Refreshing the dashboard may resolve the issue.';
+    }
+
+    const problem = error.error as
+      | {
+          title?: string;
+          detail?: string;
+        }
+      | undefined;
+
+    return problem?.detail ?? problem?.title ?? fallbackMessage;
   }
 }

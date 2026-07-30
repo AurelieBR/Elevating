@@ -1,60 +1,33 @@
-import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
-import { Goal, GoalPriority, GoalStatus } from '../../models';
+import { Goal, GoalStatus } from '../../models';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-goal-card',
-  imports: [DatePipe, RouterLink],
+  imports: [RouterLink, DatePipe],
   templateUrl: './goal-card.component.html',
   styleUrl: './goal-card.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoalCard {
   readonly goal = input.required<Goal>();
+  readonly processing = input(false);
 
-  statusLabel(status: GoalStatus): string {
-    switch (status) {
-      case GoalStatus.NotStarted:
-        return 'Not started';
-      case GoalStatus.InProgress:
-        return 'In progress';
-      case GoalStatus.Completed:
-        return 'Completed';
+  readonly completeGoal = output<Goal>();
+  readonly deleteGoal = output<Goal>();
+
+  readonly GoalStatus = GoalStatus;
+
+  requestCompletion(): void {
+    if (!this.processing()) {
+      this.completeGoal.emit(this.goal());
     }
   }
 
-  priorityLabel(priority: GoalPriority): string {
-    switch (priority) {
-      case GoalPriority.Low:
-        return 'Low';
-      case GoalPriority.Medium:
-        return 'Medium';
-      case GoalPriority.High:
-        return 'High';
-    }
-  }
-
-  statusClasses(status: GoalStatus): string {
-    switch (status) {
-      case GoalStatus.NotStarted:
-        return 'bg-slate-100 text-slate-700';
-      case GoalStatus.InProgress:
-        return 'bg-blue-100 text-blue-700';
-      case GoalStatus.Completed:
-        return 'bg-emerald-100 text-emerald-700';
-    }
-  }
-
-  priorityClasses(priority: GoalPriority): string {
-    switch (priority) {
-      case GoalPriority.Low:
-        return 'bg-green-50 text-green-700 ring-green-600/20';
-      case GoalPriority.Medium:
-        return 'bg-amber-50 text-amber-700 ring-amber-600/20';
-      case GoalPriority.High:
-        return 'bg-rose-50 text-rose-700 ring-rose-600/20';
+  requestDeletion(): void {
+    if (!this.processing()) {
+      this.deleteGoal.emit(this.goal());
     }
   }
 }

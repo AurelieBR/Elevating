@@ -1,4 +1,38 @@
 <main class="min-h-screen bg-slate-50">
+  @if (notification(); as notice) {
+    <div
+      class="fixed right-4 top-4 z-[60] w-[calc(100%-2rem)] max-w-md rounded-2xl border p-4 shadow-xl sm:right-6 sm:top-6"
+      [class.border-emerald-200]="notice.type === 'success'"
+      [class.bg-emerald-50]="notice.type === 'success'"
+      [class.text-emerald-900]="notice.type === 'success'"
+      [class.border-rose-200]="notice.type === 'error'"
+      [class.bg-rose-50]="notice.type === 'error'"
+      [class.text-rose-900]="notice.type === 'error'"
+      role="status"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="font-bold">
+            {{ notice.type === 'success' ? 'Success' : 'Something went wrong' }}
+          </p>
+
+          <p class="mt-1 text-sm leading-6">
+            {{ notice.message }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="dismissNotification()"
+          class="rounded-lg px-2 py-1 text-lg leading-none transition hover:bg-black/5"
+          aria-label="Dismiss notification"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  }
+
   <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <header class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -75,7 +109,12 @@
         @if (page.items.length > 0) {
           <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             @for (goal of page.items; track goal.id) {
-              <app-goal-card [goal]="goal" />
+              <app-goal-card
+                [goal]="goal"
+                [processing]="processingGoalId() === goal.id"
+                (completeGoal)="markComplete($event)"
+                (deleteGoal)="openDeleteDialog($event)"
+              />
             }
           </div>
 
@@ -115,4 +154,13 @@
       }
     </section>
   </div>
+
+  @if (selectedGoalForDeletion(); as goal) {
+    <app-delete-goal-dialog
+      [goal]="goal"
+      [deleting]="deleting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="closeDeleteDialog()"
+    />
+  }
 </main>
