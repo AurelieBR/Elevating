@@ -1,76 +1,69 @@
-<main class="min-h-screen bg-slate-50">
-  <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+<main class="app-page">
+  <div class="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
     <a
       routerLink="/"
-      class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-violet-700"
+      class="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-brand"
     >
       <span aria-hidden="true">←</span>
       Back to goals
     </a>
 
     <header class="mt-7">
-      <p class="text-sm font-bold uppercase tracking-[0.2em] text-violet-600">Elevating</p>
+      <p class="app-eyebrow">Elevating</p>
 
-      <h1 class="mt-2 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+      <h1 class="app-heading mt-2 text-4xl sm:text-5xl">
         {{ pageTitle() }}
       </h1>
 
-      <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+      <p class="app-copy mt-3 max-w-2xl text-base">
         {{ pageDescription() }}
       </p>
     </header>
 
     @if (loading()) {
       <section
-        class="mt-8 flex min-h-96 flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+        class="app-card mt-8 flex min-h-96 flex-col items-center justify-center p-8"
+        aria-busy="true"
       >
         <div
-          class="h-10 w-10 animate-spin rounded-full border-4 border-violet-100 border-t-violet-600"
+          class="h-10 w-10 animate-spin rounded-full border-4 border-brand-soft border-t-brand"
           aria-hidden="true"
         ></div>
 
-        <p class="mt-4 font-medium text-slate-700">Loading goal...</p>
+        <p class="mt-4 font-medium text-ink-soft">Loading goal...</p>
       </section>
     } @else if (loadError()) {
       <section
-        class="mt-8 flex min-h-80 flex-col items-center justify-center rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center"
+        class="error-panel mt-8 flex min-h-80 flex-col items-center justify-center p-8 text-center"
       >
-        <h2 class="text-xl font-bold text-rose-900">Goal unavailable</h2>
+        <div
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-xl font-black text-danger"
+          aria-hidden="true"
+        >
+          !
+        </div>
 
-        <p class="mt-2 max-w-lg text-sm leading-6 text-rose-700">
+        <h2 class="mt-5 text-xl font-bold">Goal unavailable</h2>
+
+        <p class="mt-2 max-w-lg text-sm leading-6">
           {{ loadError() }}
         </p>
 
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           @if (goalId !== null) {
-            <button
-              type="button"
-              (click)="retryLoad()"
-              class="rounded-xl bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-rose-800"
-            >
-              Try again
-            </button>
+            <button type="button" (click)="retryLoad()" class="btn-danger">Try again</button>
           }
 
-          <a
-            routerLink="/"
-            class="rounded-xl border border-rose-300 bg-white px-5 py-2.5 text-sm font-bold text-rose-800 transition hover:bg-rose-100"
-          >
-            Return to goals
-          </a>
+          <a routerLink="/" class="btn-secondary"> Return to goals </a>
         </div>
       </section>
     } @else {
-      <form
-        [formGroup]="form"
-        (ngSubmit)="submit()"
-        class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
-      >
+      <form [formGroup]="form" (ngSubmit)="submit()" class="app-card mt-8 p-6 sm:p-8">
         <div class="grid gap-6">
           <div>
-            <label for="goal-title" class="mb-2 block text-sm font-bold text-slate-800">
+            <label for="goal-title" class="form-label">
               Title
-              <span class="text-rose-600">*</span>
+              <span class="text-danger">*</span>
             </label>
 
             <input
@@ -80,13 +73,8 @@
               maxlength="200"
               autocomplete="off"
               placeholder="What do you want to accomplish?"
-              class="w-full rounded-xl border px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2"
-              [class.border-rose-400]="titleError()"
-              [class.focus:border-rose-500]="titleError()"
-              [class.focus:ring-rose-100]="titleError()"
-              [class.border-slate-300]="!titleError()"
-              [class.focus:border-violet-500]="!titleError()"
-              [class.focus:ring-violet-100]="!titleError()"
+              class="form-control"
+              [class.form-control-error]="titleError()"
               [attr.aria-invalid]="titleError() ? true : null"
               [attr.aria-describedby]="titleError() ? 'goal-title-error' : null"
             />
@@ -94,23 +82,21 @@
             <div class="mt-1.5 flex justify-between gap-4">
               <div>
                 @if (titleError(); as error) {
-                  <p id="goal-title-error" class="text-sm font-medium text-rose-600">
+                  <p id="goal-title-error" class="text-sm font-medium text-danger">
                     {{ error }}
                   </p>
                 }
               </div>
 
-              <span class="text-xs text-slate-400">
-                {{ form.controls.title.value.length }}/200
-              </span>
+              <span class="text-xs text-subtle"> {{ form.controls.title.value.length }}/200 </span>
             </div>
           </div>
 
           <div class="grid gap-6 md:grid-cols-2">
             <div>
-              <label for="goal-category" class="mb-2 block text-sm font-bold text-slate-800">
+              <label for="goal-category" class="form-label">
                 Category
-                <span class="text-rose-600">*</span>
+                <span class="text-danger">*</span>
               </label>
 
               <input
@@ -120,67 +106,62 @@
                 maxlength="100"
                 autocomplete="off"
                 placeholder="Development, health, finance..."
-                class="w-full rounded-xl border px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2"
-                [class.border-rose-400]="categoryError()"
-                [class.focus:border-rose-500]="categoryError()"
-                [class.focus:ring-rose-100]="categoryError()"
-                [class.border-slate-300]="!categoryError()"
-                [class.focus:border-violet-500]="!categoryError()"
-                [class.focus:ring-violet-100]="!categoryError()"
+                class="form-control"
+                [class.form-control-error]="categoryError()"
+                [attr.aria-invalid]="categoryError() ? true : null"
               />
 
               @if (categoryError(); as error) {
-                <p class="mt-1.5 text-sm font-medium text-rose-600">
+                <p class="mt-1.5 text-sm font-medium text-danger">
                   {{ error }}
                 </p>
               }
             </div>
 
             <div>
-              <label for="goal-target-date" class="mb-2 block text-sm font-bold text-slate-800">
-                Target date
-              </label>
+              <label for="goal-target-date" class="form-label"> Target date </label>
 
               <input
                 id="goal-target-date"
                 type="date"
                 formControlName="targetDate"
-                class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+                class="form-control"
               />
             </div>
           </div>
 
           <fieldset>
-            <legend class="text-sm font-bold text-slate-800">
+            <legend class="form-label">
               Priority
-              <span class="text-rose-600">*</span>
+              <span class="text-danger">*</span>
             </legend>
 
             <div class="mt-3 grid gap-3 md:grid-cols-3">
               @for (priority of priorities; track priority.value) {
                 <label
                   class="cursor-pointer rounded-2xl border p-4 transition"
-                  [class.border-violet-500]="form.controls.priority.value === priority.value"
-                  [class.bg-violet-50]="form.controls.priority.value === priority.value"
+                  [class.border-sage]="form.controls.priority.value === priority.value"
+                  [class.bg-sage-soft]="form.controls.priority.value === priority.value"
                   [class.ring-2]="form.controls.priority.value === priority.value"
-                  [class.ring-violet-100]="form.controls.priority.value === priority.value"
-                  [class.border-slate-200]="form.controls.priority.value !== priority.value"
-                  [class.hover:border-violet-300]="form.controls.priority.value !== priority.value"
+                  [class.ring-sage/20]="form.controls.priority.value === priority.value"
+                  [class.border-line]="form.controls.priority.value !== priority.value"
+                  [class.bg-surface-raised]="form.controls.priority.value !== priority.value"
+                  [class.hover:border-sage]="form.controls.priority.value !== priority.value"
                 >
                   <span class="flex items-start gap-3">
                     <input
                       type="radio"
                       formControlName="priority"
                       [value]="priority.value"
-                      class="mt-1 h-4 w-4 accent-violet-600"
+                      class="mt-1 h-4 w-4 accent-sage-hover"
                     />
 
                     <span>
-                      <span class="block text-sm font-bold text-slate-900">
+                      <span class="block text-sm font-bold text-ink">
                         {{ priority.label }}
                       </span>
 
-                      <span class="mt-1 block text-xs leading-5 text-slate-500">
+                      <span class="mt-1 block text-xs leading-5 text-muted">
                         {{ priority.description }}
                       </span>
                     </span>
@@ -192,15 +173,9 @@
 
           @if (isEditMode()) {
             <div>
-              <label for="goal-status" class="mb-2 block text-sm font-bold text-slate-800">
-                Status
-              </label>
+              <label for="goal-status" class="form-label"> Status </label>
 
-              <select
-                id="goal-status"
-                formControlName="status"
-                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-              >
+              <select id="goal-status" formControlName="status" class="form-control">
                 @for (status of statuses; track status.value) {
                   <option [ngValue]="status.value">
                     {{ status.label }}
@@ -211,9 +186,7 @@
           }
 
           <div>
-            <label for="goal-description" class="mb-2 block text-sm font-bold text-slate-800">
-              Description
-            </label>
+            <label for="goal-description" class="form-label"> Description </label>
 
             <textarea
               id="goal-description"
@@ -221,25 +194,21 @@
               maxlength="2000"
               rows="7"
               placeholder="Describe the result you want, why it matters, or the steps involved..."
-              class="w-full resize-y rounded-xl border px-4 py-3 leading-7 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2"
-              [class.border-rose-400]="descriptionError()"
-              [class.focus:border-rose-500]="descriptionError()"
-              [class.focus:ring-rose-100]="descriptionError()"
-              [class.border-slate-300]="!descriptionError()"
-              [class.focus:border-violet-500]="!descriptionError()"
-              [class.focus:ring-violet-100]="!descriptionError()"
+              class="form-control resize-y leading-7"
+              [class.form-control-error]="descriptionError()"
+              [attr.aria-invalid]="descriptionError() ? true : null"
             ></textarea>
 
             <div class="mt-1.5 flex justify-between gap-4">
               <div>
                 @if (descriptionError(); as error) {
-                  <p class="text-sm font-medium text-rose-600">
+                  <p class="text-sm font-medium text-danger">
                     {{ error }}
                   </p>
                 }
               </div>
 
-              <span class="text-xs text-slate-400">
+              <span class="text-xs text-subtle">
                 {{ form.controls.description.value.length }}/2000
               </span>
             </div>
@@ -247,32 +216,20 @@
         </div>
 
         @if (submitError()) {
-          <div
-            role="alert"
-            class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800"
-          >
+          <div role="alert" class="error-panel mt-6 p-4 text-sm font-medium">
             {{ submitError() }}
           </div>
         }
 
         <div
-          class="mt-8 flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end"
+          class="mt-8 flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end"
         >
-          <a
-            routerLink="/"
-            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-          >
-            Cancel
-          </a>
+          <a routerLink="/" class="btn-secondary"> Cancel </a>
 
-          <button
-            type="submit"
-            [disabled]="saving()"
-            class="inline-flex min-w-36 items-center justify-center rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
+          <button type="submit" [disabled]="saving()" class="btn-primary min-w-36">
             @if (saving()) {
               <span
-                class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-violet-200 border-t-white"
+                class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-brand-soft border-t-white"
                 aria-hidden="true"
               ></span>
 

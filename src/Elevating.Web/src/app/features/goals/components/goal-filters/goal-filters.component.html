@@ -1,43 +1,33 @@
-<section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="app-card p-5 sm:p-6">
   <div class="grid gap-4 lg:grid-cols-4">
     <div class="lg:col-span-2">
-      <label for="goal-search" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Search
-      </label>
+      <label for="goal-search" class="form-label"> Search </label>
 
       <input
         id="goal-search"
         type="search"
         [formControl]="form.controls.search"
         placeholder="Search titles or descriptions..."
-        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+        class="form-control"
       />
     </div>
 
     <div>
-      <label for="goal-category" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Category
-      </label>
+      <label for="goal-category" class="form-label"> Category </label>
 
       <input
         id="goal-category"
         type="text"
         [formControl]="form.controls.category"
         placeholder="Development"
-        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+        class="form-control"
       />
     </div>
 
     <div>
-      <label for="goal-status" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Status
-      </label>
+      <label for="goal-status" class="form-label"> Status </label>
 
-      <select
-        id="goal-status"
-        [formControl]="form.controls.status"
-        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-      >
+      <select id="goal-status" [formControl]="form.controls.status" class="form-control">
         <option [ngValue]="null">All statuses</option>
 
         @for (status of statuses; track status.value) {
@@ -49,15 +39,9 @@
     </div>
 
     <div>
-      <label for="goal-priority" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Priority
-      </label>
+      <label for="goal-priority" class="form-label"> Priority </label>
 
-      <select
-        id="goal-priority"
-        [formControl]="form.controls.priority"
-        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-      >
+      <select id="goal-priority" [formControl]="form.controls.priority" class="form-control">
         <option [ngValue]="null">All priorities</option>
 
         @for (priority of priorities; track priority.value) {
@@ -69,15 +53,9 @@
     </div>
 
     <div>
-      <label for="goal-sort" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Sort by
-      </label>
+      <label for="goal-sort" class="form-label"> Sort by </label>
 
-      <select
-        id="goal-sort"
-        [formControl]="form.controls.sortBy"
-        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-      >
+      <select id="goal-sort" [formControl]="form.controls.sortBy" class="form-control">
         @for (field of sortFields; track field.value) {
           <option [ngValue]="field.value">
             {{ field.label }}
@@ -87,30 +65,18 @@
     </div>
 
     <div>
-      <label for="goal-direction" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Direction
-      </label>
+      <label for="goal-direction" class="form-label"> Direction </label>
 
-      <select
-        id="goal-direction"
-        [formControl]="form.controls.sortDirection"
-        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-      >
+      <select id="goal-direction" [formControl]="form.controls.sortDirection" class="form-control">
         <option [ngValue]="0">Ascending</option>
         <option [ngValue]="1">Descending</option>
       </select>
     </div>
 
     <div>
-      <label for="goal-page-size" class="mb-1.5 block text-sm font-medium text-slate-700">
-        Results per page
-      </label>
+      <label for="goal-page-size" class="form-label"> Results per page </label>
 
-      <select
-        id="goal-page-size"
-        [formControl]="form.controls.pageSize"
-        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-      >
+      <select id="goal-page-size" [formControl]="form.controls.pageSize" class="form-control">
         <option [ngValue]="5">5</option>
         <option [ngValue]="10">10</option>
         <option [ngValue]="20">20</option>
@@ -118,13 +84,7 @@
     </div>
   </div>
 
-  <div class="mt-4 flex justify-end">
-    <button
-      type="button"
-      (click)="reset()"
-      class="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-    >
-      Clear filters
-    </button>
+  <div class="mt-5 flex justify-end border-t border-line pt-4">
+    <button type="button" (click)="reset()" class="btn-ghost">Clear filters</button>
   </div>
 </section>

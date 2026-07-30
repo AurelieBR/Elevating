@@ -4,7 +4,7 @@
       type="button"
       [disabled]="!hasPreviousPage()"
       (click)="goToPage(pageNumber() - 1)"
-      class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+      class="btn-secondary px-4 py-2 disabled:cursor-not-allowed disabled:opacity-40"
     >
       Previous
     </button>
@@ -15,13 +15,15 @@
         (click)="goToPage(page)"
         [attr.aria-current]="page === pageNumber() ? 'page' : null"
         class="h-10 min-w-10 rounded-xl px-3 text-sm font-semibold transition"
-        [class.bg-violet-600]="page === pageNumber()"
+        [class.bg-brand]="page === pageNumber()"
         [class.text-white]="page === pageNumber()"
-        [class.bg-white]="page !== pageNumber()"
-        [class.text-slate-700]="page !== pageNumber()"
+        [class.shadow-sm]="page === pageNumber()"
+        [class.bg-surface]="page !== pageNumber()"
+        [class.text-ink-soft]="page !== pageNumber()"
         [class.border]="page !== pageNumber()"
-        [class.border-slate-300]="page !== pageNumber()"
-        [class.hover:border-violet-300]="page !== pageNumber()"
+        [class.border-line]="page !== pageNumber()"
+        [class.hover:border-sage]="page !== pageNumber()"
+        [class.hover:text-moss]="page !== pageNumber()"
       >
         {{ page }}
       </button>
@@ -31,7 +33,7 @@
       type="button"
       [disabled]="!hasNextPage()"
       (click)="goToPage(pageNumber() + 1)"
-      class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+      class="btn-secondary px-4 py-2 disabled:cursor-not-allowed disabled:opacity-40"
     >
       Next
     </button>
