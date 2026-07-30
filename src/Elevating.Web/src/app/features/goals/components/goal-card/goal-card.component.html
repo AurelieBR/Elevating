@@ -10,7 +10,9 @@
       </p>
 
       <h2 class="mt-4 text-xl font-black text-slate-950">
-        {{ goal().title }}
+        <a [routerLink]="['/goals', goal().id]" class="transition hover:text-violet-700">
+          {{ goal().title }}
+        </a>
       </h2>
     </div>
 

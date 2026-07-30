@@ -23,6 +23,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'goals/:id',
+    loadComponent: () =>
+      import('./features/goals/pages/goal-details/goal-details.component').then(
+        (module) => module.GoalDetails,
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
   },
