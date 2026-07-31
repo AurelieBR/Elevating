@@ -35,6 +35,19 @@ public sealed class GoalsController(
         return Ok(result);
     }
 
+    [HttpGet("summary")]
+    [ProducesResponseType(
+    typeof(GoalSummaryDto),
+    StatusCodes.Status200OK)]
+    public async Task<ActionResult<GoalSummaryDto>> GetSummary(
+    CancellationToken cancellationToken)
+    {
+        var summary = await goalService.GetSummaryAsync(
+            cancellationToken);
+
+        return Ok(summary);
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(GoalDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,0 +1,203 @@
+<section aria-labelledby="goal-overview-title">
+  <div class="mb-4 flex items-end justify-between gap-4">
+    <div>
+      <p class="app-eyebrow">At a glance</p>
+
+      <h2 id="goal-overview-title" class="mt-1 text-lg font-semibold text-ink">Your progress</h2>
+    </div>
+
+    @if (summary(); as currentSummary) {
+      <p class="hidden text-sm text-muted sm:block">
+        {{ currentSummary.completed }} of {{ currentSummary.total }} goals completed
+      </p>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="grid gap-4 lg:grid-cols-[1.4fr_2fr]" aria-busy="true">
+      <div class="app-card min-h-56 animate-pulse p-6">
+        <div class="h-4 w-28 rounded bg-surface-muted"></div>
+
+        <div class="mt-6 flex items-center gap-6">
+          <div class="h-28 w-28 shrink-0 rounded-full bg-surface-muted"></div>
+
+          <div class="flex-1">
+            <div class="h-8 w-24 rounded bg-surface-muted"></div>
+            <div class="mt-3 h-4 w-full rounded bg-surface-muted"></div>
+            <div class="mt-2 h-4 w-3/4 rounded bg-surface-muted"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="app-card min-h-26 animate-pulse p-5">
+            <div class="h-3 w-20 rounded bg-surface-muted"></div>
+            <div class="mt-4 h-8 w-14 rounded bg-surface-muted"></div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (errorMessage()) {
+    <div
+      class="error-panel flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
+      role="alert"
+    >
+      <div>
+        <p class="font-semibold">Summary unavailable</p>
+
+        <p class="mt-1 text-sm">
+          {{ errorMessage() }}
+        </p>
+      </div>
+
+      <button type="button" (click)="retry()" class="btn-secondary shrink-0">Try again</button>
+    </div>
+  } @else if (summary(); as currentSummary) {
+    <div class="grid gap-4 lg:grid-cols-[1.4fr_2fr]">
+      <article class="app-card summary-progress-card relative overflow-hidden p-6 sm:p-7">
+        <div
+          class="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full bg-brand-soft/55 blur-2xl"
+          aria-hidden="true"
+        ></div>
+
+        <div class="relative">
+          <p class="text-sm font-semibold text-muted">Overall completion</p>
+
+          <div class="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center">
+            <div
+              class="progress-ring relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+              [style]="progressChartStyle()"
+              role="img"
+              [attr.aria-label]="completionPercentage() + '% of goals completed'"
+            >
+              <div
+                class="flex h-24 w-24 flex-col items-center justify-center rounded-full border border-line bg-surface-raised shadow-sm"
+              >
+                <strong class="text-3xl font-semibold tracking-tight text-ink">
+                  {{ completionPercentage() }}%
+                </strong>
+
+                <span class="mt-0.5 text-xs font-medium text-muted"> completed </span>
+              </div>
+            </div>
+
+            <div>
+              @if (currentSummary.total === 0) {
+                <h3 class="text-xl font-semibold text-ink">Your next chapter starts here</h3>
+
+                <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
+                  Create your first goal and begin turning your plans into visible progress.
+                </p>
+              } @else if (completionPercentage() === 100) {
+                <h3 class="text-xl font-semibold text-ink">Every goal is complete</h3>
+
+                <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
+                  A beautiful milestone. You have completed everything currently on your list.
+                </p>
+              } @else if (completionPercentage() >= 60) {
+                <h3 class="text-xl font-semibold text-ink">You are building momentum</h3>
+
+                <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
+                  Most of your goals are already complete. Keep nurturing the progress you have
+                  made.
+                </p>
+              } @else if (completionPercentage() > 0) {
+                <h3 class="text-xl font-semibold text-ink">Progress is taking shape</h3>
+
+                <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
+                  Each completed goal is evidence that your plans are becoming something real.
+                </p>
+              } @else {
+                <h3 class="text-xl font-semibold text-ink">Everything begins with one step</h3>
+
+                <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
+                  Choose one meaningful goal to begin, and allow consistency to carry it forward.
+                </p>
+              }
+
+              <div class="mt-4 flex items-center gap-2 text-sm">
+                <span class="h-2.5 w-2.5 rounded-full bg-sage" aria-hidden="true"></span>
+
+                <span class="text-muted"> {{ currentSummary.completed }} completed </span>
+
+                <span class="text-subtle" aria-hidden="true">•</span>
+
+                <span class="text-muted">
+                  {{ currentSummary.total - currentSummary.completed }} remaining
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <div class="grid grid-cols-2 gap-4">
+        <article class="summary-stat-card summary-stat-total">
+          <p class="summary-label">Total goals</p>
+
+          <div class="summary-stat-content">
+            <div class="summary-icon bg-brand-soft text-brand-hover" aria-hidden="true">✦</div>
+
+            <p class="summary-value">
+              {{ currentSummary.total }}
+            </p>
+          </div>
+        </article>
+
+        <article class="summary-stat-card summary-stat-planned">
+          <p class="summary-label">Not started</p>
+
+          <div class="summary-stat-content">
+            <div class="summary-icon bg-surface-muted text-ink-soft" aria-hidden="true">○</div>
+
+            <p class="summary-value">
+              {{ currentSummary.notStarted }}
+            </p>
+          </div>
+        </article>
+
+        <article class="summary-stat-card summary-stat-progress">
+          <p class="summary-label">In progress</p>
+
+          <div class="summary-stat-content">
+            <div class="summary-icon bg-gold-soft text-gold" aria-hidden="true">◐</div>
+
+            <p class="summary-value">
+              {{ currentSummary.inProgress }}
+            </p>
+          </div>
+        </article>
+
+        <article
+          class="summary-stat-card"
+          [class.summary-stat-overdue]="currentSummary.overdue > 0"
+          [class.summary-stat-clear]="currentSummary.overdue === 0"
+        >
+          <p class="summary-label">Overdue</p>
+
+          <div class="summary-stat-content">
+            <div
+              class="summary-icon"
+              [class.bg-danger-soft]="currentSummary.overdue > 0"
+              [class.text-danger]="currentSummary.overdue > 0"
+              [class.bg-sage-soft]="currentSummary.overdue === 0"
+              [class.text-moss]="currentSummary.overdue === 0"
+              aria-hidden="true"
+            >
+              {{ currentSummary.overdue > 0 ? '!' : '✓' }}
+            </div>
+
+            <p
+              class="summary-value"
+              [class.text-danger]="currentSummary.overdue > 0"
+              [class.text-moss]="currentSummary.overdue === 0"
+            >
+              {{ currentSummary.overdue }}
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  }
+</section>

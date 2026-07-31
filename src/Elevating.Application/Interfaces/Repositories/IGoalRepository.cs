@@ -8,6 +8,8 @@ public interface IGoalRepository
     Task<(IReadOnlyList<Goal> Items, int TotalCount)> GetPagedAsync(
         GoalQueryParameters parameters,
         CancellationToken cancellationToken = default);
+    Task<GoalSummaryResult> GetSummaryAsync(
+    CancellationToken cancellationToken = default);
 
     Task<Goal?> GetByIdAsync(
         int id,

@@ -21,6 +21,7 @@ describe('GoalDetails', () => {
     targetDate: '2026-08-10T00:00:00',
     createdDate: '2026-07-29T12:00:00',
     updatedDate: '2026-07-30T12:00:00',
+    isOverdue: false,
   };
 
   beforeEach(async () => {

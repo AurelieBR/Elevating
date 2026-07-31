@@ -11,6 +11,8 @@ public sealed class GoalQueryParameters : PaginationRequest
 
     public GoalPriority? Priority { get; init; }
 
+    public bool? IsOverdue { get; init; }
+
     [StringLength(100)]
     public string? Category { get; init; }
 

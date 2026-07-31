@@ -8,6 +8,7 @@ export interface GoalQueryParameters {
   pageSize: number;
   status?: GoalStatus;
   priority?: GoalPriority;
+  isOverdue?: boolean;
   category?: string;
   search?: string;
   sortBy?: GoalSortField;

@@ -23,12 +23,13 @@ public sealed class GoalService(
         logger.LogInformation(
             "Retrieving goals page {PageNumber} with page size {PageSize}. " +
             "Filters: Status={Status}, Priority={Priority}, " +
-            "Category={Category}, Search={Search}. " +
+            "IsOverdue={IsOverdue}, Category={Category}, Search={Search}. " +
             "Sorting: SortBy={SortBy}, SortDirection={SortDirection}.",
             parameters.PageNumber,
             parameters.PageSize,
             parameters.Status,
             parameters.Priority,
+            parameters.IsOverdue,
             parameters.Category,
             parameters.Search,
             parameters.SortBy,
@@ -52,6 +53,33 @@ public sealed class GoalService(
             parameters.PageNumber,
             parameters.PageSize,
             result.TotalCount);
+    }
+
+    public async Task<GoalSummaryDto> GetSummaryAsync(
+    CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "Retrieving goal dashboard summary.");
+
+        var summary = await goalRepository.GetSummaryAsync(
+            cancellationToken);
+
+        logger.LogInformation(
+            "Retrieved goal summary. Total={Total}, " +
+            "NotStarted={NotStarted}, InProgress={InProgress}, " +
+            "Completed={Completed}, Overdue={Overdue}.",
+            summary.Total,
+            summary.NotStarted,
+            summary.InProgress,
+            summary.Completed,
+            summary.Overdue);
+
+        return new GoalSummaryDto(
+            summary.Total,
+            summary.NotStarted,
+            summary.InProgress,
+            summary.Completed,
+            summary.Overdue);
     }
 
     public async Task<GoalDto?> GetByIdAsync(
@@ -200,6 +228,11 @@ public sealed class GoalService(
 
     private static GoalDto MapToDto(Goal goal)
     {
+        var isOverdue =
+       goal.TargetDate.HasValue &&
+       goal.TargetDate.Value < DateTime.UtcNow.Date &&
+       goal.Status != GoalStatus.Completed;
+
         return new GoalDto(
             goal.Id,
             goal.Title,
@@ -209,7 +242,8 @@ public sealed class GoalService(
             goal.Status,
             goal.TargetDate,
             goal.CreatedDate,
-            goal.UpdatedDate);
+            goal.UpdatedDate,
+            isOverdue);
     }
 
     private static string? NormalizeOptionalText(string? value)

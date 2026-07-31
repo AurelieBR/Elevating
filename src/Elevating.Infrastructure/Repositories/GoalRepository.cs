@@ -1,8 +1,10 @@
-﻿using Elevating.Application.Interfaces.Repositories;
+﻿using Elevating.Application.Common.Queries;
+using Elevating.Application.Interfaces.Repositories;
 using Elevating.Domain.Entities;
+using Elevating.Domain.Enums;
 using Elevating.Infrastructure.Persistence;
+
 using Microsoft.EntityFrameworkCore;
-using Elevating.Application.Common.Queries;
 
 namespace Elevating.Infrastructure.Repositories;
 
@@ -14,9 +16,12 @@ public sealed class GoalRepository(AppDbContext dbContext)
             GoalQueryParameters parameters,
             CancellationToken cancellationToken = default)
     {
+        var today = DateTime.UtcNow.Date;
+
         var query = dbContext.Goals
             .AsNoTracking()
             .AsQueryable();
+        
 
         if (parameters.Status.HasValue)
         {
@@ -28,6 +33,19 @@ public sealed class GoalRepository(AppDbContext dbContext)
         {
             query = query.Where(
                 goal => goal.Priority == parameters.Priority.Value);
+        }
+
+        if (parameters.IsOverdue.HasValue)
+        {
+            query = parameters.IsOverdue.Value
+                ? query.Where(goal =>
+                    goal.TargetDate.HasValue &&
+                    goal.TargetDate.Value < today &&
+                    goal.Status != GoalStatus.Completed)
+                : query.Where(goal =>
+                    !goal.TargetDate.HasValue ||
+                    goal.TargetDate.Value >= today ||
+                    goal.Status == GoalStatus.Completed);
         }
 
         if (!string.IsNullOrWhiteSpace(parameters.Category))
@@ -61,6 +79,32 @@ public sealed class GoalRepository(AppDbContext dbContext)
         return (items, totalCount);
     }
 
+    public async Task<GoalSummaryResult> GetSummaryAsync(
+    CancellationToken cancellationToken = default)
+    {
+        var today = DateTime.UtcNow.Date;
+
+        var summary = await dbContext.Goals
+            .AsNoTracking()
+            .GroupBy(_ => 1)
+            .Select(group => new GoalSummaryResult(
+                group.Count(),
+                group.Count(goal => goal.Status == GoalStatus.NotStarted),
+                group.Count(goal => goal.Status == GoalStatus.InProgress),
+                group.Count(goal => goal.Status == GoalStatus.Completed),
+                group.Count(goal =>
+                    goal.TargetDate.HasValue &&
+                    goal.TargetDate.Value < today &&
+                    goal.Status != GoalStatus.Completed)))
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return summary ?? new GoalSummaryResult(
+            Total: 0,
+            NotStarted: 0,
+            InProgress: 0,
+            Completed: 0,
+            Overdue: 0);
+    }
 
     public Task<Goal?> GetByIdAsync(
         int id,
