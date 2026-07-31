@@ -9,6 +9,8 @@ public interface IGoalService
     Task<PagedResult<GoalDto>> GetPagedAsync(
         GoalQueryParameters parameters,
         CancellationToken cancellationToken = default);
+    Task<GoalSummaryDto> GetSummaryAsync(
+    CancellationToken cancellationToken = default);
 
     Task<GoalDto?> GetByIdAsync(
         int id,

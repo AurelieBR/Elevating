@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+
+.summary-progress-card {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 94%, var(--color-brand-soft)),
+    var(--color-surface)
+  );
+}
+
+.progress-ring {
+  box-shadow:
+    0 12px 28px rgba(75, 57, 39, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.summary-stat-card {
+  display: flex;
+  min-height: 7rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.85rem;
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.summary-stat-content {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.summary-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-line-strong);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.summary-stat-total {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 88%, var(--color-brand-soft)),
+    var(--color-surface)
+  );
+}
+
+.summary-stat-planned {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-muted)),
+    var(--color-surface)
+  );
+}
+
+.summary-stat-progress {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 91%, var(--color-gold-soft)),
+    var(--color-surface)
+  );
+}
+
+.summary-stat-overdue {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 90%, var(--color-danger-soft)),
+    var(--color-surface)
+  );
+}
+
+.summary-stat-clear {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-surface) 90%, var(--color-sage-soft)),
+    var(--color-surface)
+  );
+}
+
+.summary-icon {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.summary-label {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.summary-value {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}

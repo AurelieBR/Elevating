@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   GoalPriority,
@@ -16,6 +16,7 @@ interface GoalFiltersForm {
   category: FormControl<string>;
   status: FormControl<GoalStatus | null>;
   priority: FormControl<GoalPriority | null>;
+  isOverdue: FormControl<boolean>;
   sortBy: FormControl<GoalSortField>;
   sortDirection: FormControl<SortDirection>;
   pageSize: FormControl<number>;
@@ -45,6 +46,15 @@ export class GoalFilters {
     { value: GoalPriority.High, label: 'High' },
   ];
 
+  readonly deadlineOptions: readonly {
+    value: boolean | null;
+    label: string;
+  }[] = [
+    { value: null, label: 'All deadlines' },
+    { value: true, label: 'Overdue only' },
+    { value: false, label: 'Not overdue' },
+  ];
+
   readonly sortFields: readonly {
     value: GoalSortField;
     label: string;
@@ -67,6 +77,9 @@ export class GoalFilters {
     }),
     status: new FormControl<GoalStatus | null>(null),
     priority: new FormControl<GoalPriority | null>(null),
+    isOverdue: new FormControl(false, {
+      nonNullable: true,
+    }),
     sortBy: new FormControl<GoalSortField>('createdDate', {
       nonNullable: true,
     }),
@@ -92,6 +105,7 @@ export class GoalFilters {
       category: '',
       status: null,
       priority: null,
+      isOverdue: false,
       sortBy: 'createdDate',
       sortDirection: SortDirection.Descending,
       pageSize: 10,
@@ -108,6 +122,7 @@ export class GoalFilters {
       category: value.category.trim() || undefined,
       status: value.status ?? undefined,
       priority: value.priority ?? undefined,
+      isOverdue: value.isOverdue || undefined,
       sortBy: value.sortBy,
       sortDirection: value.sortDirection,
     });

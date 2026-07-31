@@ -11,4 +11,5 @@ public sealed record GoalDto(
     GoalStatus Status,
     DateTime? TargetDate,
     DateTime CreatedDate,
-    DateTime UpdatedDate);
+    DateTime UpdatedDate,
+    bool IsOverdue);

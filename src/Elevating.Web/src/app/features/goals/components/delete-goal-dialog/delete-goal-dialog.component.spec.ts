@@ -17,6 +17,7 @@ describe('DeleteGoalDialog', () => {
     targetDate: null,
     createdDate: '2026-07-29T12:00:00',
     updatedDate: '2026-07-29T12:00:00',
+    isOverdue: false,
   };
 
   beforeEach(async () => {

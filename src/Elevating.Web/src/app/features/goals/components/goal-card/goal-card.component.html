@@ -1,11 +1,30 @@
-<article class="app-card app-card-interactive flex h-full flex-col p-6">
+<article
+  class="goal-card app-card app-card-interactive relative flex h-full flex-col overflow-hidden p-6"
+  [class.goal-card-overdue]="goal().isOverdue"
+>
+  @if (goal().isOverdue) {
+    <div class="goal-card-overdue-accent" aria-hidden="true"></div>
+  }
+
   <div class="flex items-start justify-between gap-4">
     <div class="min-w-0 flex-1">
-      <p
-        class="inline-flex rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-hover"
-      >
-        {{ goal().category }}
-      </p>
+      <div class="flex flex-wrap items-center gap-2">
+        <p
+          class="inline-flex rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-hover"
+        >
+          {{ goal().category }}
+        </p>
+
+        @if (goal().isOverdue) {
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-danger-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-danger"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-danger" aria-hidden="true"></span>
+
+            Overdue
+          </span>
+        }
+      </div>
 
       <h2 class="mt-4 min-h-[3.5rem] text-xl font-semibold leading-7 tracking-tight text-ink">
         <a
@@ -74,9 +93,19 @@
     </div>
 
     <div>
-      <dt class="font-medium text-muted">Target date</dt>
+      <dt
+        class="font-medium"
+        [class.text-danger]="goal().isOverdue"
+        [class.text-muted]="!goal().isOverdue"
+      >
+        Target date
+      </dt>
 
-      <dd class="mt-2 font-semibold text-ink">
+      <dd
+        class="mt-2 font-semibold"
+        [class.text-danger]="goal().isOverdue"
+        [class.text-ink]="!goal().isOverdue"
+      >
         @if (goal().targetDate) {
           {{ goal().targetDate | date: 'MMM d, y' }}
         } @else {

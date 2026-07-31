@@ -81,6 +81,38 @@ public sealed class GoalServiceTests
     }
 
     [Fact]
+    public async Task GetSummaryAsync_ShouldReturnMappedSummary()
+    {
+        // Arrange
+        var repositoryResult = new GoalSummaryResult(
+            Total: 12,
+            NotStarted: 4,
+            InProgress: 3,
+            Completed: 5,
+            Overdue: 2);
+
+        goalRepositoryMock
+            .Setup(repository => repository.GetSummaryAsync(
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(repositoryResult);
+
+        // Act
+        var result = await goalService.GetSummaryAsync();
+
+        // Assert
+        Assert.Equal(12, result.Total);
+        Assert.Equal(4, result.NotStarted);
+        Assert.Equal(3, result.InProgress);
+        Assert.Equal(5, result.Completed);
+        Assert.Equal(2, result.Overdue);
+
+        goalRepositoryMock.Verify(
+            repository => repository.GetSummaryAsync(
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
     public async Task GetByIdAsync_WhenGoalExists_ShouldReturnMappedGoal()
     {
         // Arrange

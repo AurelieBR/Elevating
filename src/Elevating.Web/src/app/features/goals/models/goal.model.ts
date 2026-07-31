@@ -10,4 +10,5 @@ export interface Goal {
   targetDate: string | null;
   createdDate: string;
   updatedDate: string;
+  isOverdue: boolean;
 }

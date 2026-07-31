@@ -3,7 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { PagedResult } from '../../../core/models/paged-result.model';
-import { CreateGoalRequest, Goal, GoalQueryParameters, UpdateGoalRequest } from '../models';
+import {
+  CreateGoalRequest,
+  Goal,
+  GoalQueryParameters,
+  GoalSummary,
+  UpdateGoalRequest,
+} from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +22,10 @@ export class GoalsApi {
     return this.http.get<PagedResult<Goal>>(this.baseUrl, {
       params: this.buildQueryParams(parameters),
     });
+  }
+
+  getSummary(): Observable<GoalSummary> {
+    return this.http.get<GoalSummary>(`${this.baseUrl}/summary`);
   }
 
   getById(id: number): Observable<Goal> {
@@ -49,6 +59,10 @@ export class GoalsApi {
 
     if (parameters.priority !== undefined) {
       params = params.set('priority', parameters.priority.toString());
+    }
+
+    if (parameters.isOverdue !== undefined) {
+      params = params.set('isOverdue', parameters.isOverdue.toString());
     }
 
     if (parameters.category?.trim()) {

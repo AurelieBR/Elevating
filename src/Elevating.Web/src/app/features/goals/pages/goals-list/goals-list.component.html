@@ -51,7 +51,16 @@
       </a>
     </header>
 
-    <app-goal-filters (filtersChanged)="applyFilters($event)" />
+    <app-goal-summary
+      [summary]="summary()"
+      [loading]="summaryLoading()"
+      [errorMessage]="summaryError()"
+      (retryRequested)="retrySummary()"
+    />
+
+    <div class="mt-8">
+      <app-goal-filters (filtersChanged)="applyFilters($event)" />
+    </div>
 
     <section class="mt-8">
       @if (loading()) {

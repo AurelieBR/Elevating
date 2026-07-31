@@ -133,6 +133,89 @@ public sealed class GoalsControllerTests
     }
 
     [Fact]
+    public async Task GetSummary_ShouldReturnGoalTotals()
+    {
+        // Arrange
+        await factory.ResetDatabaseAsync();
+
+        // Act
+        var response = await client.GetAsync(
+            "/api/goals/summary");
+
+        // Assert
+        Assert.Equal(
+            HttpStatusCode.OK,
+            response.StatusCode);
+
+        var summary =
+            await response.Content
+                .ReadFromJsonAsync<GoalSummaryDto>();
+
+        Assert.NotNull(summary);
+        Assert.Equal(5, summary.Total);
+        Assert.Equal(2, summary.NotStarted);
+        Assert.Equal(1, summary.InProgress);
+        Assert.Equal(2, summary.Completed);
+        Assert.Equal(0, summary.Overdue);
+    }
+
+    [Fact]
+    public async Task GetSummary_ShouldCountOnlyOverdueIncompleteGoals()
+    {
+        // Arrange
+        await factory.ResetDatabaseAsync();
+
+        var today = DateTime.UtcNow.Date;
+
+        await factory.AddGoalAsync(
+            title: "Overdue not started goal",
+            status: GoalStatus.NotStarted,
+            targetDate: today.AddDays(-2));
+
+        await factory.AddGoalAsync(
+            title: "Overdue in-progress goal",
+            status: GoalStatus.InProgress,
+            targetDate: today.AddDays(-1));
+
+        await factory.AddGoalAsync(
+            title: "Completed past-due goal",
+            status: GoalStatus.Completed,
+            targetDate: today.AddDays(-3));
+
+        await factory.AddGoalAsync(
+            title: "Goal due today",
+            status: GoalStatus.NotStarted,
+            targetDate: today);
+
+        await factory.AddGoalAsync(
+            title: "Goal without target date",
+            status: GoalStatus.InProgress,
+            targetDate: null,
+            useDefaultTargetDate: false);
+
+        // Act
+        var response = await client.GetAsync(
+            "/api/goals/summary");
+
+        // Assert
+        Assert.Equal(
+            HttpStatusCode.OK,
+            response.StatusCode);
+
+        var summary =
+            await response.Content
+                .ReadFromJsonAsync<GoalSummaryDto>();
+
+        Assert.NotNull(summary);
+
+        Assert.Equal(10, summary.Total);
+        Assert.Equal(4, summary.NotStarted);
+        Assert.Equal(3, summary.InProgress);
+        Assert.Equal(3, summary.Completed);
+        Assert.Equal(2, summary.Overdue);
+    }
+
+    [Fact]
     public async Task GetById_WhenGoalExists_ShouldReturnGoal()
     {
         // Arrange

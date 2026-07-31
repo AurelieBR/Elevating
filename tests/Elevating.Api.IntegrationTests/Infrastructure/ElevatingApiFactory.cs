@@ -72,10 +72,12 @@ public sealed class ElevatingApiFactory
     }
 
     public async Task<int> AddGoalAsync(
-        string title = "Integration test goal",
-        string category = "Testing",
-        GoalPriority priority = GoalPriority.Medium,
-        GoalStatus status = GoalStatus.NotStarted)
+    string title = "Integration test goal",
+    string category = "Testing",
+    GoalPriority priority = GoalPriority.Medium,
+    GoalStatus status = GoalStatus.NotStarted,
+    DateTime? targetDate = null,
+    bool useDefaultTargetDate = true)
     {
         using var scope = Services.CreateScope();
 
@@ -91,7 +93,9 @@ public sealed class ElevatingApiFactory
             Description = "Created during an integration test.",
             Priority = priority,
             Status = status,
-            TargetDate = now.AddDays(10),
+            TargetDate = useDefaultTargetDate
+                ? targetDate ?? now.AddDays(10)
+                : targetDate,
             CreatedDate = now,
             UpdatedDate = now
         };

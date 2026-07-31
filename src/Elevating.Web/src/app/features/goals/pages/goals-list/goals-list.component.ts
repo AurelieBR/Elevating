@@ -13,15 +13,23 @@ import { PagedResult } from '../../../../core/models/paged-result.model';
 import { GoalCard } from '../../components/goal-card/goal-card.component';
 import { GoalFilters } from '../../components/goal-filters/goal-filters.component';
 import { GoalPagination } from '../../components/goal-pagination/goal-pagination.component';
-import { Goal, GoalStatus, GoalQueryParameters, SortDirection } from '../../models';
+import { Goal, GoalStatus, GoalQueryParameters, GoalSummary, SortDirection } from '../../models';
 import { GoalsApi } from '../../services/goals-api.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DeleteGoalDialog } from '../../components/delete-goal-dialog/delete-goal-dialog.component';
+import { GoalSummaryComponent } from '../../components/goal-summary/goal-summary.component';
 
 @Component({
   selector: 'app-goals-list',
-  imports: [RouterLink, GoalCard, GoalFilters, GoalPagination, DeleteGoalDialog],
+  imports: [
+    RouterLink,
+    GoalCard,
+    GoalFilters,
+    GoalPagination,
+    DeleteGoalDialog,
+    GoalSummaryComponent,
+  ],
   templateUrl: './goals-list.component.html',
   styleUrl: './goals-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +40,10 @@ export class GoalsList implements OnInit {
   readonly result = signal<PagedResult<Goal> | null>(null);
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly summary = signal<GoalSummary | null>(null);
+  readonly summaryLoading = signal(false);
+  readonly summaryError = signal<string | null>(null);
 
   readonly query = signal<GoalQueryParameters>({
     pageNumber: 1,
@@ -55,6 +67,7 @@ export class GoalsList implements OnInit {
 
   ngOnInit(): void {
     this.loadGoals();
+    this.loadSummary();
   }
 
   applyFilters(parameters: GoalQueryParameters): void {
@@ -84,6 +97,10 @@ export class GoalsList implements OnInit {
     this.loadGoals();
   }
 
+  retrySummary(): void {
+    this.loadSummary();
+  }
+
   private loadGoals(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
@@ -104,6 +121,28 @@ export class GoalsList implements OnInit {
           this.errorMessage.set(
             'We could not load your goals. Make sure the API is running and try again.',
           );
+        },
+      });
+  }
+
+  private loadSummary(): void {
+    this.summaryLoading.set(true);
+    this.summaryError.set(null);
+
+    this.goalsApi
+      .getSummary()
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.summaryLoading.set(false);
+        }),
+      )
+      .subscribe({
+        next: (summary) => {
+          this.summary.set(summary);
+        },
+        error: () => {
+          this.summaryError.set('The goal summary could not be loaded.');
         },
       });
   }
@@ -129,6 +168,7 @@ export class GoalsList implements OnInit {
           this.showNotification('success', `“${goal.title}” was marked as completed.`);
 
           this.loadGoals();
+          this.loadSummary();
         },
         error: (error: HttpErrorResponse) => {
           this.showNotification(
@@ -181,6 +221,7 @@ export class GoalsList implements OnInit {
 
           this.adjustPageAfterDeletion();
           this.loadGoals();
+          this.loadSummary();
         },
         error: (error: HttpErrorResponse) => {
           this.showNotification(
