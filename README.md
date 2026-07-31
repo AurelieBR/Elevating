@@ -194,6 +194,7 @@ The interface includes:
 - Loading, empty, and error states
 - Confirmation dialogs
 - Muted animations and transitions
+- Dashboard statistics & Overdue tracking
 
 ## Roadmap
 
@@ -202,7 +203,6 @@ Possible future improvements include:
 - User authentication
 - User-specific goals
 - Goal progress percentages
-- Dashboard statistics
 - Goal notes and milestones
 - Cloud deployment
 - Continuous integration and deployment

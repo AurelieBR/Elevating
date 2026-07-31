@@ -46,15 +46,6 @@ export class GoalFilters {
     { value: GoalPriority.High, label: 'High' },
   ];
 
-  readonly deadlineOptions: readonly {
-    value: boolean | null;
-    label: string;
-  }[] = [
-    { value: null, label: 'All deadlines' },
-    { value: true, label: 'Overdue only' },
-    { value: false, label: 'Not overdue' },
-  ];
-
   readonly sortFields: readonly {
     value: GoalSortField;
     label: string;
