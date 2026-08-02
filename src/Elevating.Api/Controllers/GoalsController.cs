@@ -1,5 +1,6 @@
 ﻿using Elevating.Application.Common.Pagination;
 using Elevating.Application.Common.Queries;
+using Elevating.Application.Common.Results;
 using Elevating.Application.DTOs.Goals;
 using Elevating.Application.Interfaces.Services;
 
@@ -81,8 +82,8 @@ public sealed class GoalsController(
         if (!validationResult.IsValid)
         {
             return ValidationProblem(
-				new ValidationProblemDetails(
-					validationResult.ToDictionary()));
+                new ValidationProblemDetails(
+                    validationResult.ToDictionary()));
         }
 
         var goal = await goalService.CreateAsync(
@@ -114,8 +115,8 @@ public sealed class GoalsController(
         if (!validationResult.IsValid)
         {
             return ValidationProblem(
-				new ValidationProblemDetails(
-					validationResult.ToDictionary()));
+                new ValidationProblemDetails(
+                    validationResult.ToDictionary()));
         }
 
         var updated = await goalService.UpdateAsync(
@@ -130,18 +131,51 @@ public sealed class GoalsController(
 
     [HttpPatch("{id:int}/complete")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(
+        typeof(ProblemDetails),
+        StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(
+        typeof(ProblemDetails),
+        StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Complete(
         int id,
+        CompleteGoalRequest? request,
         CancellationToken cancellationToken)
     {
-        var completed = await goalService.CompleteAsync(
+        var result = await goalService.CompleteAsync(
             id,
+            request ?? new CompleteGoalRequest(null),
             cancellationToken);
 
-        return completed
-            ? NoContent()
-            : NotFound();
+        return result switch
+        {
+            CompleteGoalResult.Completed =>
+                NoContent(),
+
+            CompleteGoalResult.NotFound =>
+                NotFound(),
+
+            CompleteGoalResult.ResolutionRequired =>
+                Conflict(new ProblemDetails
+                {
+                    Title = "Unfinished actions remain",
+                    Detail =
+                        "Choose whether to complete or skip " +
+                        "the remaining actions."
+                }),
+
+            CompleteGoalResult.InvalidResolution =>
+                BadRequest(new ProblemDetails
+                {
+                    Title = "Invalid action resolution",
+                    Detail =
+                        "The remaining action resolution is invalid."
+                }),
+
+            _ => throw new InvalidOperationException(
+                "Unknown goal completion result.")
+        };
     }
 
     [HttpDelete("{id:int}")]

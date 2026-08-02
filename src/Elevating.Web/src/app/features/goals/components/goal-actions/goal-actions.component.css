@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+
+.actions-panel {
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-brand-soft) 55%, transparent),
+      transparent 18rem
+    ),
+    var(--color-surface);
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--color-sage), var(--color-gold));
+  transition: width 280ms ease;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  background: var(--color-surface-raised);
+  padding: 1rem;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.action-row:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-line-strong);
+}
+
+.action-completed {
+  border-color: color-mix(in srgb, var(--color-sage) 40%, var(--color-line));
+  background: color-mix(in srgb, var(--color-sage-soft) 42%, var(--color-surface-raised));
+}
+
+.action-skipped {
+  opacity: 0.7;
+  background: var(--color-surface-muted);
+}
+
+.action-check {
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-line-strong);
+  border-radius: 999px;
+  color: var(--color-muted);
+  font-weight: 700;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.action-check:hover {
+  transform: scale(1.06);
+  border-color: var(--color-sage);
+}
+
+.action-check-completed {
+  border-color: var(--color-sage);
+  background: var(--color-sage);
+  color: white;
+}
+
+.action-empty {
+  border: 1px dashed var(--color-line-strong);
+  border-radius: 1.5rem;
+  background: color-mix(in srgb, var(--color-brand-soft) 30%, var(--color-surface));
+}
+
+.completion-celebration {
+  border: 1px solid color-mix(in srgb, var(--color-sage) 35%, var(--color-line));
+  border-radius: 1.25rem;
+  background: var(--color-sage-soft);
+}

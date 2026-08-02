@@ -1,9 +1,11 @@
 ﻿using Elevating.Application.Common.Queries;
+using Elevating.Application.Common.Results;
 using Elevating.Application.DTOs.Goals;
 using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Services;
 using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
+
 
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -364,10 +366,10 @@ public sealed class GoalServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await goalService.CompleteAsync(7);
+        var result = await goalService.CompleteAsync(7, new CompleteGoalRequest(null));
 
         // Assert
-        Assert.True(result);
+        Assert.Equal(CompleteGoalResult.Completed, result);
         Assert.Equal(GoalStatus.Completed, goal.Status);
         Assert.True(goal.UpdatedDate > originalUpdatedDate);
 
@@ -388,10 +390,10 @@ public sealed class GoalServiceTests
             .ReturnsAsync((Goal?)null);
 
         // Act
-        var result = await goalService.CompleteAsync(999);
+        var result = await goalService.CompleteAsync(999, new CompleteGoalRequest(null));
 
         // Assert
-        Assert.False(result);
+        Assert.Equal(CompleteGoalResult.NotFound, result);
 
         goalRepositoryMock.Verify(
             repository => repository.SaveChangesAsync(

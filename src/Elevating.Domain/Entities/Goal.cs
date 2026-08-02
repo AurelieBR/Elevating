@@ -21,4 +21,7 @@ public sealed class Goal
     public DateTime CreatedDate { get; set; }
 
     public DateTime UpdatedDate { get; set; }
+
+    public ICollection<GoalAction> Actions { get; set; }
+    = new List<GoalAction>();
 }

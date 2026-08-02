@@ -14,10 +14,17 @@ import { finalize } from 'rxjs';
 import { DeleteGoalDialog } from '../../components/delete-goal-dialog/delete-goal-dialog.component';
 import { Goal, GoalPriority, GoalStatus } from '../../models';
 import { GoalsApi } from '../../services/goals-api.service';
+import { RemainingActionsResolution } from '../../models';
+
+import { GoalActions } from '../../components/goal-actions/goal-actions.component';
+
+import { CompleteGoalDialog } from '../../components/complete-goal-dialog/complete-goal-dialog.component';
+
+type ArrivalNotice = 'created' | 'updated';
 
 @Component({
   selector: 'app-goal-details',
-  imports: [DatePipe, RouterLink, DeleteGoalDialog],
+  imports: [DatePipe, RouterLink, DeleteGoalDialog, GoalActions, CompleteGoalDialog],
   templateUrl: './goal-details.component.html',
   styleUrl: './goal-details.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,12 +46,51 @@ export class GoalDetails implements OnInit {
     message: string;
   } | null>(null);
 
+  readonly arrivalNotice = signal<ArrivalNotice | null>(null);
+
   readonly GoalStatus = GoalStatus;
   readonly GoalPriority = GoalPriority;
 
+  readonly completeDialogOpen = signal(false);
+
   private goalId: number | null = null;
 
+  dismissArrivalNotice(): void {
+    this.arrivalNotice.set(null);
+  }
+
+  private initializeArrivalNotice(): void {
+    const notice = this.route.snapshot.queryParamMap.get('notice');
+
+    if (notice === 'created' || notice === 'updated') {
+      this.arrivalNotice.set(notice);
+    }
+  }
+
+  scrollToActions(): void {
+    const section = document.getElementById('goal-actions');
+
+    if (!section) {
+      return;
+    }
+
+    section.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+
+    window.setTimeout(() => {
+      const actionInput = document.getElementById('new-goal-action') as HTMLInputElement | null;
+
+      actionInput?.focus({
+        preventScroll: true,
+      });
+    }, 500);
+  }
+
   ngOnInit(): void {
+    this.initializeArrivalNotice();
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -64,11 +110,45 @@ export class GoalDetails implements OnInit {
       return;
     }
 
+    if (goal.pendingActionCount > 0) {
+      this.completeDialogOpen.set(true);
+      return;
+    }
+
+    this.completeGoal(null);
+  }
+
+  completeRemainingActions(): void {
+    this.completeGoal(RemainingActionsResolution.Complete);
+  }
+
+  skipRemainingActions(): void {
+    this.completeGoal(RemainingActionsResolution.Skip);
+  }
+
+  closeCompleteDialog(): void {
+    if (!this.processing()) {
+      this.completeDialogOpen.set(false);
+    }
+  }
+
+  actionsChanged(): void {
+    this.arrivalNotice.set(null);
+    this.loadGoal();
+  }
+
+  private completeGoal(resolution: RemainingActionsResolution | null): void {
+    const goal = this.goal();
+
+    if (goal === null || this.processing()) {
+      return;
+    }
+
     this.processing.set(true);
     this.notification.set(null);
 
     this.goalsApi
-      .complete(goal.id)
+      .complete(goal.id, resolution)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => {
@@ -77,9 +157,11 @@ export class GoalDetails implements OnInit {
       )
       .subscribe({
         next: () => {
+          this.completeDialogOpen.set(false);
+
           this.notification.set({
             type: 'success',
-            message: 'The goal was marked as completed.',
+            message: 'Beautiful work — this goal is complete.',
           });
 
           this.loadGoal();

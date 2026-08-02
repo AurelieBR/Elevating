@@ -1,11 +1,13 @@
-﻿using Elevating.Application.DTOs.Goals;
+﻿using Elevating.Application.Common.Pagination;
+using Elevating.Application.Common.Queries;
+using Elevating.Application.Common.Results;
+using Elevating.Application.DTOs.Goals;
 using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Interfaces.Services;
 using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
-using Elevating.Application.Common.Pagination;
+
 using Microsoft.Extensions.Logging;
-using Elevating.Application.Common.Queries;
 
 namespace Elevating.Application.Services;
 
@@ -128,6 +130,32 @@ public sealed class GoalService(
         return MapToDto(goal);
     }
 
+    private static GoalStatus CalculateActionDrivenStatus(
+    Goal goal)
+    {
+        if (goal.Actions.Count == 0)
+        {
+            return goal.Status;
+        }
+
+        var pendingCount = goal.Actions.Count(
+            action =>
+                action.Status == GoalActionStatus.Pending);
+
+        if (pendingCount == 0)
+        {
+            return GoalStatus.Completed;
+        }
+
+        var completedCount = goal.Actions.Count(
+            action =>
+                action.Status == GoalActionStatus.Completed);
+
+        return completedCount > 0
+            ? GoalStatus.InProgress
+            : GoalStatus.NotStarted;
+    }
+
     public async Task<bool> UpdateAsync(
         int id,
         UpdateGoalRequest request,
@@ -153,7 +181,7 @@ public sealed class GoalService(
         goal.Category = request.Category.Trim();
         goal.Description = NormalizeOptionalText(request.Description);
         goal.Priority = request.Priority;
-        goal.Status = request.Status;
+        goal.Status = goal.Actions.Count == 0 ? request.Status : CalculateActionDrivenStatus(goal);
         goal.TargetDate = request.TargetDate;
         goal.UpdatedDate = DateTime.UtcNow;
 
@@ -166,35 +194,79 @@ public sealed class GoalService(
         return true;
     }
 
-    public async Task<bool> CompleteAsync(
+    public async Task<CompleteGoalResult> CompleteAsync(
         int id,
+        CompleteGoalRequest request,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-       "Completing goal {GoalId}.",
-       id);
+        ArgumentNullException.ThrowIfNull(request);
 
-        var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
+        logger.LogInformation(
+            "Completing goal {GoalId}.",
+            id);
+
+        var goal = await goalRepository.GetByIdAsync(
+            id,
+            cancellationToken);
 
         if (goal is null)
         {
             logger.LogWarning(
-           "Goal {GoalId} was not found.",
-           id);
+                "Goal {GoalId} was not found.",
+                id);
 
-            return false;
+            return CompleteGoalResult.NotFound;
+        }
+
+        var resolution =
+            request.RemainingActionsResolution;
+
+        if (resolution.HasValue &&
+            !Enum.IsDefined(
+                typeof(RemainingActionsResolution),
+                resolution.Value))
+        {
+            return CompleteGoalResult.InvalidResolution;
+        }
+
+        var pendingActions = goal.Actions
+            .Where(action =>
+                action.Status == GoalActionStatus.Pending)
+            .ToList();
+
+        if (pendingActions.Count > 0 &&
+            !resolution.HasValue)
+        {
+            return CompleteGoalResult.ResolutionRequired;
+        }
+
+        var now = DateTime.UtcNow;
+
+        if (pendingActions.Count > 0)
+        {
+            var newStatus =
+                resolution == RemainingActionsResolution.Complete
+                    ? GoalActionStatus.Completed
+                    : GoalActionStatus.Skipped;
+
+            foreach (var action in pendingActions)
+            {
+                action.Status = newStatus;
+                action.UpdatedDate = now;
+            }
         }
 
         goal.Status = GoalStatus.Completed;
-        goal.UpdatedDate = DateTime.UtcNow;
+        goal.UpdatedDate = now;
 
-        await goalRepository.SaveChangesAsync(cancellationToken);
+        await goalRepository.SaveChangesAsync(
+            cancellationToken);
 
         logger.LogInformation(
-      "Goal {GoalId} completed successfully.",
-      id);
+            "Goal {GoalId} completed successfully.",
+            id);
 
-        return true;
+        return CompleteGoalResult.Completed;
     }
 
     public async Task<bool> DeleteAsync(
@@ -229,9 +301,35 @@ public sealed class GoalService(
     private static GoalDto MapToDto(Goal goal)
     {
         var isOverdue =
-       goal.TargetDate.HasValue &&
-       goal.TargetDate.Value < DateTime.UtcNow.Date &&
-       goal.Status != GoalStatus.Completed;
+            goal.TargetDate.HasValue &&
+            goal.TargetDate.Value < DateTime.UtcNow.Date &&
+            goal.Status != GoalStatus.Completed;
+
+        var actionCount = goal.Actions.Count;
+
+        var completedActionCount = goal.Actions.Count(
+            action =>
+                action.Status == GoalActionStatus.Completed);
+
+        var skippedActionCount = goal.Actions.Count(
+            action =>
+                action.Status == GoalActionStatus.Skipped);
+
+        var pendingActionCount = goal.Actions.Count(
+            action =>
+                action.Status == GoalActionStatus.Pending);
+
+        var requiredActionCount =
+            actionCount - skippedActionCount;
+
+        var progressPercentage =
+            goal.Status == GoalStatus.Completed
+                ? 100
+                : requiredActionCount == 0
+                    ? 0
+                    : (int)Math.Round(
+                        completedActionCount * 100.0 /
+                        requiredActionCount);
 
         return new GoalDto(
             goal.Id,
@@ -243,7 +341,12 @@ public sealed class GoalService(
             goal.TargetDate,
             goal.CreatedDate,
             goal.UpdatedDate,
-            isOverdue);
+            isOverdue,
+            actionCount,
+            completedActionCount,
+            skippedActionCount,
+            pendingActionCount,
+            progressPercentage);
     }
 
     private static string? NormalizeOptionalText(string? value)

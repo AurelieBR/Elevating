@@ -22,6 +22,11 @@ describe('GoalDetails', () => {
     createdDate: '2026-07-29T12:00:00',
     updatedDate: '2026-07-30T12:00:00',
     isOverdue: false,
+    actionCount: 0,
+    completedActionCount: 0,
+    skippedActionCount: 0,
+    pendingActionCount: 0,
+    progressPercentage: 0,
   };
 
   beforeEach(async () => {
@@ -38,6 +43,9 @@ describe('GoalDetails', () => {
               paramMap: convertToParamMap({
                 id: '1',
               }),
+              queryParamMap: convertToParamMap({
+                notice: 'created',
+              }),
             },
           },
         },
@@ -51,11 +59,19 @@ describe('GoalDetails', () => {
 
     fixture.detectChanges();
 
-    const request = httpTestingController.expectOne(
-      (req) => req.method === 'GET' && req.url.toLowerCase().endsWith('/goals/1'),
+    const goalRequest = httpTestingController.expectOne(
+      (request) => request.method === 'GET' && request.url.toLowerCase().endsWith('/goals/1'),
     );
 
-    request.flush(goal);
+    goalRequest.flush(goal);
+    fixture.detectChanges();
+
+    const actionsRequest = httpTestingController.expectOne(
+      (request) =>
+        request.method === 'GET' && request.url.toLowerCase().endsWith('/goals/1/actions'),
+    );
+
+    actionsRequest.flush([]);
     fixture.detectChanges();
   });
 
@@ -70,5 +86,20 @@ describe('GoalDetails', () => {
   it('should load the goal', () => {
     expect(component.goal()).toEqual(goal);
     expect(component.loading()).toBe(false);
+  });
+
+  it('should show the post-creation actions prompt', () => {
+    expect(component.arrivalNotice()).toBe('created');
+
+    const text = fixture.nativeElement.textContent as string;
+
+    expect(text).toContain('Your goal is ready');
+    expect(text).toContain('Add first action');
+  });
+
+  it('should dismiss the arrival notice', () => {
+    component.dismissArrivalNotice();
+
+    expect(component.arrivalNotice()).toBeNull();
   });
 });

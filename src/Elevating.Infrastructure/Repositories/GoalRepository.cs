@@ -20,8 +20,9 @@ public sealed class GoalRepository(AppDbContext dbContext)
 
         var query = dbContext.Goals
             .AsNoTracking()
+            .Include(goal => goal.Actions)
             .AsQueryable();
-        
+
 
         if (parameters.Status.HasValue)
         {
@@ -111,6 +112,7 @@ public sealed class GoalRepository(AppDbContext dbContext)
         CancellationToken cancellationToken = default)
     {
         return dbContext.Goals
+            .Include(goal => goal.Actions)
             .FirstOrDefaultAsync(
                 goal => goal.Id == id,
                 cancellationToken);

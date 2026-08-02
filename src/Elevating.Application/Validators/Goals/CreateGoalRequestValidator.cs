@@ -1,5 +1,6 @@
 ﻿using Elevating.Application.DTOs.Goals;
 using Elevating.Domain.Enums;
+
 using FluentValidation;
 
 namespace Elevating.Application.Validators.Goals;
