@@ -14,3 +14,14 @@ export enum SortDirection {
   Ascending = 0,
   Descending = 1,
 }
+
+export enum GoalActionStatus {
+  Pending = 0,
+  Completed = 1,
+  Skipped = 2,
+}
+
+export enum RemainingActionsResolution {
+  Complete = 0,
+  Skip = 1,
+}

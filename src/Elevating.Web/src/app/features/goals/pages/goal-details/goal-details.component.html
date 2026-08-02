@@ -8,6 +8,63 @@
       Back to goals
     </a>
 
+    @if (arrivalNotice(); as arrival) {
+      <section
+        class="mt-6 overflow-hidden rounded-3xl border border-sage bg-sage-soft"
+        role="status"
+      >
+        <div class="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-xl text-moss shadow-sm"
+              aria-hidden="true"
+            >
+              ✦
+            </div>
+
+            <div>
+              <p class="app-eyebrow">
+                {{ arrival === 'created' ? 'Your goal is ready' : 'Changes saved' }}
+              </p>
+
+              <h2 class="mt-1 text-lg font-semibold text-ink">
+                {{
+                  arrival === 'created'
+                    ? 'Now give it its first small action'
+                    : 'Continue building your path forward'
+                }}
+              </h2>
+
+              <p class="mt-1 text-sm leading-6 text-muted">
+                {{
+                  arrival === 'created'
+                    ? 'Turn this goal into practical, satisfying steps you can complete one by one.'
+                    : 'Your goal details are updated. Its actions and progress are waiting below.'
+                }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-2">
+            <button type="button" (click)="scrollToActions()" class="btn-primary">
+              {{ arrival === 'created' ? 'Add first action' : 'View actions' }}
+
+              <span aria-hidden="true">↓</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="dismissArrivalNotice()"
+              class="btn-ghost px-3"
+              aria-label="Dismiss message"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      </section>
+    }
+
     @if (notification(); as notice) {
       <div
         class="mt-6 rounded-2xl border p-4 shadow-card"
@@ -99,6 +156,34 @@
             </span>
           </div>
         </header>
+
+        @if (currentGoal.status === GoalStatus.Completed) {
+          <section
+            class="mx-6 mt-6 rounded-2xl border border-sage bg-sage-soft p-5 sm:mx-8 sm:p-6"
+            role="status"
+          >
+            <div class="flex items-center gap-4">
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface text-2xl shadow-sm"
+                aria-hidden="true"
+              >
+                🎉
+              </div>
+
+              <div>
+                <p class="app-eyebrow text-moss">Goal achieved</p>
+
+                <h2 class="mt-1 text-lg font-semibold text-ink">
+                  Beautiful work — you completed this goal
+                </h2>
+
+                <p class="mt-1 text-sm leading-6 text-muted">
+                  Every necessary step has been resolved. Take a moment to celebrate your progress.
+                </p>
+              </div>
+            </div>
+          </section>
+        }
 
         <div class="p-6 sm:p-8">
           <section>
@@ -200,6 +285,20 @@
           </div>
         </div>
       </article>
+
+      <section id="goal-actions" class="scroll-mt-8">
+        <app-goal-actions [goal]="currentGoal" (goalChanged)="actionsChanged()" />
+      </section>
+
+      @if (completeDialogOpen()) {
+        <app-complete-goal-dialog
+          [goal]="currentGoal"
+          [processing]="processing()"
+          (completeAll)="completeRemainingActions()"
+          (skipRemaining)="skipRemainingActions()"
+          (cancelled)="closeCompleteDialog()"
+        />
+      }
 
       @if (deleteDialogOpen()) {
         <app-delete-goal-dialog

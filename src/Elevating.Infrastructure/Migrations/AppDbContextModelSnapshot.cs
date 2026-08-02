@@ -67,6 +67,59 @@ namespace Elevating.Infrastructure.Migrations
 
                     b.ToTable("Goals", (string)null);
                 });
+
+            modelBuilder.Entity("Elevating.Domain.Entities.GoalAction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GoalId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GoalId");
+
+                    b.HasIndex("GoalId", "Position");
+
+                    b.ToTable("GoalActions", (string)null);
+                });
+
+            modelBuilder.Entity("Elevating.Domain.Entities.GoalAction", b =>
+                {
+                    b.HasOne("Elevating.Domain.Entities.Goal", "Goal")
+                        .WithMany("Actions")
+                        .HasForeignKey("GoalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Goal");
+                });
+
+            modelBuilder.Entity("Elevating.Domain.Entities.Goal", b =>
+                {
+                    b.Navigation("Actions");
+                });
 #pragma warning restore 612, 618
         }
     }

@@ -11,4 +11,9 @@ export interface Goal {
   createdDate: string;
   updatedDate: string;
   isOverdue: boolean;
+  actionCount: number;
+  completedActionCount: number;
+  skippedActionCount: number;
+  pendingActionCount: number;
+  progressPercentage: number;
 }

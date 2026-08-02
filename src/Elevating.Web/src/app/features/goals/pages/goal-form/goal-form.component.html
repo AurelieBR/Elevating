@@ -20,6 +20,33 @@
       </p>
     </header>
 
+    @if (isEditMode() && goalId !== null && !loading() && !loadError()) {
+      <section
+        class="app-card mt-6 flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+      >
+        <div>
+          <p class="app-eyebrow">Goal progress</p>
+
+          <h2 class="mt-1 text-lg font-semibold text-ink">Actions are managed separately</h2>
+
+          <p class="mt-2 max-w-xl text-sm leading-6 text-muted">
+            Update the goal details here, or return to the goal page to add, complete, edit, and
+            organize its actions.
+          </p>
+        </div>
+
+        <a
+          [routerLink]="['/goals', goalId]"
+          class="btn-secondary shrink-0"
+          data-testid="manage-actions-link"
+        >
+          Manage actions and progress
+
+          <span aria-hidden="true">→</span>
+        </a>
+      </section>
+    }
+
     @if (loading()) {
       <section
         class="app-card mt-8 flex min-h-96 flex-col items-center justify-center p-8"

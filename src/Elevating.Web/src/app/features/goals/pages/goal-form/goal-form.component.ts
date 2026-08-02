@@ -267,8 +267,12 @@ export class GoalForm {
         }),
       )
       .subscribe({
-        next: () => {
-          void this.router.navigate(['/']);
+        next: (createdGoal) => {
+          void this.router.navigate(['/goals', createdGoal.id], {
+            queryParams: {
+              notice: 'created',
+            },
+          });
         },
         error: (error: HttpErrorResponse) => {
           this.submitError.set(this.getSubmitError(error));
@@ -305,7 +309,11 @@ export class GoalForm {
       )
       .subscribe({
         next: () => {
-          void this.router.navigate(['/']);
+          void this.router.navigate(['/goals', this.goalId], {
+            queryParams: {
+              notice: 'updated',
+            },
+          });
         },
         error: (error: HttpErrorResponse) => {
           this.submitError.set(

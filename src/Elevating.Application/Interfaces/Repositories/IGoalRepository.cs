@@ -1,5 +1,5 @@
-﻿using Elevating.Domain.Entities;
-using Elevating.Application.Common.Queries;
+﻿using Elevating.Application.Common.Queries;
+using Elevating.Domain.Entities;
 
 namespace Elevating.Application.Interfaces.Repositories;
 

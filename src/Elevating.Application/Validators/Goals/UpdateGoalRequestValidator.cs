@@ -1,4 +1,5 @@
 ﻿using Elevating.Application.DTOs.Goals;
+
 using FluentValidation;
 
 namespace Elevating.Application.Validators.Goals;

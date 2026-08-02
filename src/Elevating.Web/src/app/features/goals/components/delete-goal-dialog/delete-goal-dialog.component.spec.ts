@@ -18,6 +18,11 @@ describe('DeleteGoalDialog', () => {
     createdDate: '2026-07-29T12:00:00',
     updatedDate: '2026-07-29T12:00:00',
     isOverdue: false,
+    actionCount: 0,
+    completedActionCount: 0,
+    skippedActionCount: 0,
+    pendingActionCount: 0,
+    progressPercentage: 0,
   };
 
   beforeEach(async () => {

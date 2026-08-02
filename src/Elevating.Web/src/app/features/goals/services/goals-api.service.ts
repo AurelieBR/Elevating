@@ -4,10 +4,14 @@ import { Observable } from 'rxjs';
 
 import { PagedResult } from '../../../core/models/paged-result.model';
 import {
+  CreateGoalActionRequest,
   CreateGoalRequest,
   Goal,
+  GoalAction,
   GoalQueryParameters,
   GoalSummary,
+  RemainingActionsResolution,
+  UpdateGoalActionRequest,
   UpdateGoalRequest,
 } from '../models';
 
@@ -40,8 +44,39 @@ export class GoalsApi {
     return this.http.put<void>(`${this.baseUrl}/${id}`, request);
   }
 
-  complete(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${id}/complete`, null);
+  complete(
+    id: number,
+    remainingActionsResolution: RemainingActionsResolution | null = null,
+  ): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/complete`, { remainingActionsResolution });
+  }
+
+  getActions(goalId: number): Observable<GoalAction[]> {
+    return this.http.get<GoalAction[]>(`${this.baseUrl}/${goalId}/actions`);
+  }
+
+  createAction(goalId: number, request: CreateGoalActionRequest): Observable<GoalAction> {
+    return this.http.post<GoalAction>(`${this.baseUrl}/${goalId}/actions`, request);
+  }
+
+  updateAction(
+    goalId: number,
+    actionId: number,
+    request: UpdateGoalActionRequest,
+  ): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${goalId}/actions/${actionId}`, request);
+  }
+
+  completeAction(goalId: number, actionId: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${goalId}/actions/${actionId}/complete`, null);
+  }
+
+  reopenAction(goalId: number, actionId: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${goalId}/actions/${actionId}/reopen`, null);
+  }
+
+  deleteAction(goalId: number, actionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${goalId}/actions/${actionId}`);
   }
 
   delete(id: number): Observable<void> {

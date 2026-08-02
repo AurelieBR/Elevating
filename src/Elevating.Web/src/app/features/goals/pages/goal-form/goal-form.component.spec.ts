@@ -56,6 +56,12 @@ describe('GoalForm', () => {
 
     fixture.detectChanges();
 
+    const manageActionsLink = fixture.nativeElement.querySelector(
+      '[data-testid="manage-actions-link"]',
+    );
+
+    expect(manageActionsLink).toBeNull();
+
     expect(fixture.componentInstance).toBeTruthy();
     expect(fixture.componentInstance.isEditMode()).toBe(false);
     expect(goalsApiMock.getById).not.toHaveBeenCalled();
@@ -76,7 +82,7 @@ describe('GoalForm', () => {
     expect(goalsApiMock.create).not.toHaveBeenCalled();
   });
 
-  it('should create a valid goal and navigate home', () => {
+  it('should create a valid goal and navigate to its details page', () => {
     goalsApiMock.create.mockReturnValue(
       of({
         id: 1,
@@ -116,7 +122,11 @@ describe('GoalForm', () => {
       targetDate: null,
     });
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/goals', 1], {
+      queryParams: {
+        notice: 'created',
+      },
+    });
   });
 
   it('should load and update an existing goal', () => {
@@ -143,6 +153,13 @@ describe('GoalForm', () => {
 
     fixture.detectChanges();
 
+    const manageActionsLink = fixture.nativeElement.querySelector(
+      '[data-testid="manage-actions-link"]',
+    );
+
+    expect(manageActionsLink).not.toBeNull();
+    expect(manageActionsLink.textContent).toContain('Manage actions and progress');
+
     expect(component.isEditMode()).toBe(true);
     expect(goalsApiMock.getById).toHaveBeenCalledWith(7);
     expect(component.form.controls.title.value).toBe('Existing goal');
@@ -163,6 +180,10 @@ describe('GoalForm', () => {
       }),
     );
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/goals', 7], {
+      queryParams: {
+        notice: 'updated',
+      },
+    });
   });
 });

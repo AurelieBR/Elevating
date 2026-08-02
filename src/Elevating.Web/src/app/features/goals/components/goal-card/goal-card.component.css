@@ -32,3 +32,102 @@
     color-mix(in srgb, var(--color-danger) 45%, var(--color-gold-soft))
   );
 }
+
+.goal-progress-fill {
+  background: linear-gradient(90deg, var(--color-sage), var(--color-gold));
+  transition: width 280ms ease;
+}
+
+.goal-title-link {
+  text-decoration-color: transparent;
+  text-underline-offset: 0.25rem;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.goal-title-link:hover {
+  text-decoration-line: underline;
+  text-decoration-color: currentColor;
+}
+
+.goal-title-arrow,
+.goal-cta-arrow {
+  display: inline-block;
+  margin-left: 0.2rem;
+  transition: transform 160ms ease;
+}
+
+.goal-title-link:hover .goal-title-arrow {
+  transform: translate(0.12rem, -0.12rem);
+}
+
+a:hover .goal-cta-arrow {
+  transform: translateX(0.18rem);
+}
+
+.goal-card-completed {
+  border-color: color-mix(in srgb, var(--color-sage) 52%, var(--color-line));
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-sage-soft) 88%, transparent),
+      transparent 13rem
+    ),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--color-surface) 88%, var(--color-sage-soft)),
+      var(--color-surface) 68%
+    );
+  box-shadow:
+    0 14px 34px rgba(111, 126, 75, 0.13),
+    var(--shadow-card);
+}
+
+.goal-card-completed:hover {
+  border-color: color-mix(in srgb, var(--color-sage) 72%, var(--color-line));
+  box-shadow:
+    0 20px 44px rgba(111, 126, 75, 0.18),
+    var(--shadow-card-hover);
+}
+
+.goal-card-completed-accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.25rem;
+  background: var(--color-sage);
+}
+
+.goal-card-confetti {
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  color: var(--color-gold);
+  font-size: 1.1rem;
+  opacity: 0.65;
+  pointer-events: none;
+  animation: goal-celebration 2.8s ease-in-out infinite;
+}
+
+.goal-card-completed .goal-progress-fill {
+  background: linear-gradient(90deg, var(--color-sage), var(--color-moss), var(--color-gold));
+}
+
+@keyframes goal-celebration {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translateY(-0.2rem) rotate(12deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal-card-confetti {
+    animation: none;
+  }
+}

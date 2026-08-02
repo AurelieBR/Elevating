@@ -12,4 +12,9 @@ public sealed record GoalDto(
     DateTime? TargetDate,
     DateTime CreatedDate,
     DateTime UpdatedDate,
-    bool IsOverdue);
+    bool IsOverdue,
+    int ActionCount,
+    int CompletedActionCount,
+    int SkippedActionCount,
+    int PendingActionCount,
+    int ProgressPercentage);

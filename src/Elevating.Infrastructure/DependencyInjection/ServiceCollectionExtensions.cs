@@ -1,6 +1,7 @@
 ﻿using Elevating.Application.Interfaces.Repositories;
 using Elevating.Infrastructure.Persistence;
 using Elevating.Infrastructure.Repositories;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,8 @@ public static class ServiceCollectionExtensions
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IGoalRepository, GoalRepository>();
+
+        services.AddScoped<IGoalActionRepository, GoalActionRepository>();
 
         return services;
     }

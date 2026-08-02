@@ -1,6 +1,7 @@
 <article
   class="goal-card app-card app-card-interactive relative flex h-full flex-col overflow-hidden p-6"
   [class.goal-card-overdue]="goal().isOverdue"
+  [class.goal-card-completed]="goal().status === GoalStatus.Completed"
 >
   @if (goal().isOverdue) {
     <div class="goal-card-overdue-accent" aria-hidden="true"></div>
@@ -24,14 +25,24 @@
             Overdue
           </span>
         }
+
+        @if (goal().status === GoalStatus.Completed) {
+          <div class="goal-card-completed-accent" aria-hidden="true"></div>
+
+          <div class="goal-card-confetti" aria-hidden="true">✦</div>
+        }
       </div>
 
       <h2 class="mt-4 min-h-[3.5rem] text-xl font-semibold leading-7 tracking-tight text-ink">
         <a
           [routerLink]="['/goals', goal().id]"
-          class="line-clamp-2 transition-colors hover:text-brand"
+          class="goal-title-link group line-clamp-2 rounded-sm transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4"
         >
           {{ goal().title }}
+
+          <span class="goal-title-arrow" aria-hidden="true"> ↗ </span>
+
+          <span class="sr-only"> Open goal details </span>
         </a>
       </h2>
     </div>
@@ -50,7 +61,10 @@
           In progress
         }
         @case (GoalStatus.Completed) {
-          Completed
+          <span class="inline-flex items-center gap-1.5">
+            <span aria-hidden="true">✓</span>
+            Completed
+          </span>
         }
       }
     </span>
@@ -65,6 +79,39 @@
       <p class="text-sm italic leading-6 text-subtle">No description provided.</p>
     }
   </div>
+
+  <section class="mt-5" aria-label="Goal progress">
+    <div class="flex items-center justify-between gap-4">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted">
+        @if (goal().actionCount > 0) {
+          {{ goal().completedActionCount }}
+          of
+          {{ goal().actionCount - goal().skippedActionCount }}
+          actions
+        } @else if (goal().status === GoalStatus.Completed) {
+          Goal achieved ✦
+        } @else {
+          No actions yet
+        }
+      </p>
+
+      <p class="text-sm font-semibold text-ink">{{ goal().progressPercentage }}%</p>
+    </div>
+
+    <div
+      class="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted"
+      role="progressbar"
+      aria-label="Goal progress"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="goal().progressPercentage"
+    >
+      <div
+        class="goal-progress-fill h-full rounded-full"
+        [style.width.%]="goal().progressPercentage"
+      ></div>
+    </div>
+  </section>
 
   <dl class="mt-5 grid grid-cols-2 gap-4 text-sm">
     <div>
@@ -116,21 +163,33 @@
   </dl>
 
   <div class="mt-6 flex flex-wrap items-center gap-2 border-t border-line pt-5">
-    @if (goal().status !== GoalStatus.Completed) {
+    <a
+      [routerLink]="['/goals', goal().id]"
+      class="btn-primary px-4 py-2.5"
+      data-testid="primary-goal-action"
+    >
+      @if (goal().status === GoalStatus.Completed) {
+        View
+      } @else {
+        Continue
+      }
+    </a>
+
+    @if (goal().status !== GoalStatus.Completed && goal().actionCount === 0) {
       <button
         type="button"
         (click)="requestCompletion()"
         [disabled]="processing()"
-        class="inline-flex items-center justify-center rounded-xl bg-sage px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sage-hover disabled:cursor-not-allowed disabled:opacity-50"
+        class="btn-ghost px-3 py-2.5 text-moss disabled:cursor-not-allowed disabled:opacity-50"
       >
         @if (processing()) {
           <span
-            class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-sage-soft border-t-white"
+            class="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-sage-soft border-t-sage"
             aria-hidden="true"
           ></span>
         }
 
-        Mark complete
+        Complete
       </button>
     }
 

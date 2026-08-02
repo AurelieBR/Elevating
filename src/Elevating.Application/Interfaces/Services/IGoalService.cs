@@ -1,6 +1,7 @@
-﻿using Elevating.Application.DTOs.Goals;
-using Elevating.Application.Common.Pagination;
+﻿using Elevating.Application.Common.Pagination;
 using Elevating.Application.Common.Queries;
+using Elevating.Application.Common.Results;
+using Elevating.Application.DTOs.Goals;
 
 namespace Elevating.Application.Interfaces.Services;
 
@@ -25,8 +26,9 @@ public interface IGoalService
         UpdateGoalRequest request,
         CancellationToken cancellationToken = default);
 
-    Task<bool> CompleteAsync(
+    Task<CompleteGoalResult> CompleteAsync(
         int id,
+        CompleteGoalRequest request,
         CancellationToken cancellationToken = default);
 
     Task<bool> DeleteAsync(
