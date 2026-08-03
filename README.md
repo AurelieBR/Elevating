@@ -1,5 +1,7 @@
 # Elevating
 
+[![CI](https://github.com/AurelieBR/Elevating/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AurelieBR/Elevating/actions/workflows/ci.yml)
+
 Elevating is a full-stack goal management application built with ASP.NET Core and Angular.
 
 It helps users turn goals into clear, actionable steps, track progress automatically, manage priorities and deadlines, and stay focused through a calm, responsive interface.
