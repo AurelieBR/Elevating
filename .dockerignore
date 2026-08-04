@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github
+
+# IDE files
+.vs
+.vscode
+.idea
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET build output
+**/bin
+**/obj
+TestResults
+**/TestResults
+*.trx
+coverage
+coverage.*
+*.coverage
+*.coveragexml
+
+# Frontend dependencies and build output
+**/node_modules
+**/dist
+.angular
+**/.angular
+
+# Logs
+*.log
+logs
+**/logs
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Docker files not required in the build context
+docker-compose*.yml
+
+# Documentation and repository metadata
+README.md
+LICENSE

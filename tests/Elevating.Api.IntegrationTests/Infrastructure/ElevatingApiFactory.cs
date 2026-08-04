@@ -26,12 +26,7 @@ public sealed class ElevatingApiFactory
 
         builder.ConfigureServices(services =>
         {
-            /*
-             * Remove the production SQL Server configuration.
-             *
-             * DbContextOptions alone is not enough because AddDbContext
-             * also registers IDbContextOptionsConfiguration<AppDbContext>.
-             */
+            
             services.RemoveAll<AppDbContext>();
             services.RemoveAll<DbContextOptions<AppDbContext>>();
             services.RemoveAll<
