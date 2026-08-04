@@ -25,5 +25,11 @@
     <ProjectReference Include="..\..\src\Elevating.Api\Elevating.Api.csproj" />
     <ProjectReference Include="..\..\src\Elevating.Infrastructure\Elevating.Infrastructure.csproj" />
   </ItemGroup>
+  
+<ItemGroup>
+  <Content Update="appsettings.Testing.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
 
 </Project>

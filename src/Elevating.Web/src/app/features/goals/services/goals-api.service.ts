@@ -15,12 +15,14 @@ import {
   UpdateGoalRequest,
 } from '../models';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class GoalsApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/goals';
+  private readonly baseUrl = `${environment.apiBaseUrl}/goals`;
 
   getAll(parameters: GoalQueryParameters): Observable<PagedResult<Goal>> {
     return this.http.get<PagedResult<Goal>>(this.baseUrl, {
