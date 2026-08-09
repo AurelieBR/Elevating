@@ -1,10 +1,33 @@
 # Elevating
 
 [![CI](https://github.com/AurelieBR/Elevating/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AurelieBR/Elevating/actions/workflows/ci.yml)
+[![Deploy Frontend](https://github.com/AurelieBR/Elevating/actions/workflows/deploy-frontend.yml/badge.svg?branch=main)](https://github.com/AurelieBR/Elevating/actions/workflows/deploy-frontend.yml)
 
 Elevating is a full-stack goal management application built with ASP.NET Core and Angular.
 
 It helps users turn goals into clear, actionable steps, track progress automatically, manage priorities and deadlines, and stay focused through a calm, responsive interface.
+
+## Live Application
+
+Frontend:
+
+```text
+https://victorious-bay-085dce910.7.azurestaticapps.net/
+```
+
+API:
+
+```text
+https://ca-elevating-api-prod.proudground-8d9a69fa.canadacentral.azurecontainerapps.io
+```
+
+Health check:
+
+```text
+https://ca-elevating-api-prod.proudground-8d9a69fa.canadacentral.azurecontainerapps.io/api/health
+```
+
+> The current production version is intentionally anonymous. Authentication and user-specific data are planned as the next major application phase.
 
 ## Features
 
@@ -22,6 +45,7 @@ It helps users turn goals into clear, actionable steps, track progress automatic
 - Dashboard summary with total, not started, in progress, completed, and overdue counts
 - Progress indicators on goal cards and goal details
 - Overdue goal highlighting
+- Completed-goal visual states
 - Priority and status indicators
 - Form validation
 - Confirmation dialogs
@@ -31,18 +55,21 @@ It helps users turn goals into clear, actionable steps, track progress automatic
 - Structured API error handling
 - Backend unit and integration tests
 - Frontend component tests
+- Automated CI quality gates
+- Automated frontend deployment
 
 ## Tech Stack
 
 ### Backend
 
-- ASP.NET Core
+- ASP.NET Core 10
 - C#
 - Entity Framework Core
-- SQL Server
+- Azure SQL Database
 - FluentValidation
 - Swagger / OpenAPI
 - xUnit
+- Docker
 
 ### Frontend
 
@@ -54,7 +81,20 @@ It helps users turn goals into clear, actionable steps, track progress automatic
 - Tailwind CSS
 - Vitest
 
+### Cloud & DevOps
+
+- GitHub Actions
+- GitHub Container Registry
+- Azure Static Web Apps
+- Azure Container Apps
+- Azure SQL Database
+- Docker
+- Environment-specific configuration
+- Secret-backed production configuration
+
 ## Architecture
+
+### Application architecture
 
 The backend follows a layered architecture:
 
@@ -86,6 +126,33 @@ src/app/
         ├── pages/
         └── services/
 ```
+
+### Production architecture
+
+```text
+GitHub
+   │
+   ├── CI
+   │   ├── .NET build and tests
+   │   └── Angular formatting, linting, tests, and build
+   │
+   └── Frontend deployment
+          │
+          ▼
+Azure Static Web Apps
+          │
+          │ HTTPS
+          ▼
+Azure Container Apps
+ASP.NET Core API
+          │
+          ▼
+Azure SQL Database
+```
+
+The API is packaged as a Docker image and published through GitHub Container Registry.
+
+Production configuration is supplied through environment variables and Container App secrets rather than committed configuration files.
 
 ## Goal Progress Rules
 
@@ -150,10 +217,11 @@ Progress: 2 / 4 = 50%
 
 Install the following tools:
 
-- .NET SDK
+- .NET 10 SDK
 - Node.js
 - npm
 - SQL Server
+- Docker Desktop, if building the API container locally
 
 ### Clone the Repository
 
@@ -162,16 +230,18 @@ git clone https://github.com/AurelieBR/Elevating.git
 cd Elevating
 ```
 
-### Configure the Database
+### Configure the Local Database
 
-Update the connection string in the API configuration if needed.
+Development database configuration belongs in:
+
+```text
+src/Elevating.Api/appsettings.Development.json
+```
 
 Apply the database migrations from the repository root:
 
 ```powershell
-dotnet ef database update `
-  --project .\src\Elevating.Infrastructure `
-  --startup-project .\src\Elevating.Api
+dotnet ef database update --project .\src\Elevating.Infrastructure --startup-project .\src\Elevating.Api
 ```
 
 ### Run the API
@@ -226,6 +296,34 @@ The application will be available at:
 http://localhost:4200
 ```
 
+Local Angular development uses the `/api` proxy while production uses the Azure Container Apps API endpoint through Angular environment configuration.
+
+## Docker
+
+The ASP.NET Core API uses a multi-stage Docker build:
+
+```text
+.NET 10 SDK image
+        ↓
+Restore and publish
+        ↓
+ASP.NET Core 10 runtime image
+```
+
+Build the image from the repository root:
+
+```powershell
+docker build -f .\src\Elevating.Api\Dockerfile -t elevating-api:local .
+```
+
+The production container listens on:
+
+```text
+8080
+```
+
+Production images are published to GitHub Container Registry.
+
 ## Testing
 
 ### Backend Tests
@@ -246,19 +344,95 @@ npm run test:run
 
 ### Frontend Linting
 
-From the Angular project:
-
 ```powershell
 npm run lint
 ```
 
-### Frontend Build
-
-From the Angular project:
+### Frontend Production Build
 
 ```powershell
 npm run build
 ```
+
+### Complete Frontend Quality Check
+
+```powershell
+npm run check
+```
+
+This runs formatting validation, linting, frontend tests, and the Angular production build.
+
+## CI/CD
+
+### Continuous Integration
+
+GitHub Actions runs automated quality gates on pushes and pull requests.
+
+The CI workflow validates:
+
+```text
+Backend
+├── dotnet restore
+├── dotnet build --configuration Release
+└── dotnet test
+
+Frontend
+├── npm ci
+└── npm run check
+```
+
+The `main` branch is protected and requires the backend and frontend checks to pass before changes can be merged.
+
+### Continuous Deployment
+
+Frontend deployment is handled by:
+
+```text
+.github/workflows/deploy-frontend.yml
+```
+
+After successful CI on `main`, the Angular application is deployed to Azure Static Web Apps.
+
+The production frontend communicates with the separately hosted ASP.NET Core API through an explicitly configured CORS allowlist.
+
+API container deployment is currently managed separately and can be fully automated in a future deployment workflow.
+
+## Production Configuration
+
+Environment-specific configuration keeps local development and production concerns separate.
+
+### Development
+
+```text
+Angular API base URL: /api
+Database: Local SQL Server / SQL Express
+ASP.NET Core environment: Development
+```
+
+### Production
+
+```text
+Frontend: Azure Static Web Apps
+API: Azure Container Apps
+Database: Azure SQL Database
+ASP.NET Core environment: Production
+```
+
+Sensitive production values such as the Azure SQL connection string are stored as Azure Container App secrets and exposed to ASP.NET Core through secret-backed environment variables.
+
+The production API also uses an explicit frontend CORS origin rather than allowing requests from arbitrary origins.
+
+## Database Deployment
+
+Production database changes are deployed through reviewed EF Core migration scripts rather than automatically migrating the database during API startup.
+
+Generate an idempotent production migration script from the repository root:
+
+```powershell
+dotnet ef migrations script --idempotent --project .\src\Elevating.Infrastructure --startup-project .\src\Elevating.Api --output .\deployment\sql\elevating.sql
+```
+
+The generated script uses EF Core migration history to apply only missing migrations.
 
 ## Design
 
@@ -280,7 +454,7 @@ The interface includes:
 
 ## Current Project Status
 
-The application currently includes:
+### Complete
 
 - Goal CRUD
 - Search, filtering, sorting, and pagination
@@ -291,21 +465,33 @@ The application currently includes:
 - Automatic goal status synchronization
 - Goal completion with complete-or-skip action resolution
 - Responsive Angular interface
-- Backend and frontend test coverage
+- Backend unit and integration tests
+- Frontend component tests
+- GitHub Actions CI
+- Protected `main` quality gates
+- Dockerized ASP.NET Core API
+- Azure SQL production database
+- Azure Container Apps API deployment
+- Azure Static Web Apps frontend deployment
+- Environment-specific configuration
+- Production secret management
+- Production CORS configuration
+- Automated frontend deployment
 
 ## Roadmap
 
 Possible future improvements include:
 
 - User authentication
-- User-specific goals
+- User-specific goals and data isolation
+- API deployment automation
 - Goal notes
 - Milestones
 - Action reordering
 - Action due dates
 - Recurring goals
 - Reminders and notifications
-- Cloud deployment
-- Continuous integration and deployment
 - Improved accessibility testing
 - Expanded dashboard analytics
+- Production observability and monitoring
+- Key Vault / managed identity hardening
