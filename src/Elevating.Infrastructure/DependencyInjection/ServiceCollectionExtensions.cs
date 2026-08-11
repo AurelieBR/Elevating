@@ -1,4 +1,5 @@
 ﻿using Elevating.Application.Interfaces.Repositories;
+using Elevating.Infrastructure.Identity;
 using Elevating.Infrastructure.Persistence;
 using Elevating.Infrastructure.Repositories;
 
@@ -24,6 +25,10 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
+
+        services
+            .AddIdentityCore<ApplicationUser>()
+            .AddEntityFrameworkStores<AppDbContext>();
 
         services.AddScoped<IGoalRepository, GoalRepository>();
 
