@@ -1,4 +1,5 @@
 ﻿using Elevating.Domain.Entities;
+using Elevating.Infrastructure.Identity;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,6 +15,14 @@ public sealed class GoalConfiguration : IEntityTypeConfiguration<Goal>
         builder.ToTable("Goals");
 
         builder.HasKey(goal => goal.Id);
+
+        builder.Property(goal => goal.OwnerId)
+            .IsRequired(false);
+
+        builder.HasOne<ApplicationUser>()
+            .WithMany()
+            .HasForeignKey(goal => goal.OwnerId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.Property(goal => goal.Title)
             .HasMaxLength(200)
@@ -45,5 +54,7 @@ public sealed class GoalConfiguration : IEntityTypeConfiguration<Goal>
         builder.HasIndex(goal => goal.Status);
 
         builder.HasIndex(goal => goal.Category);
+
+        builder.HasIndex(goal => goal.OwnerId);
     }
 }

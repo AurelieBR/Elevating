@@ -6,12 +6,16 @@ namespace Elevating.Application.Interfaces.Repositories;
 public interface IGoalRepository
 {
     Task<(IReadOnlyList<Goal> Items, int TotalCount)> GetPagedAsync(
+        Guid ownerId,
         GoalQueryParameters parameters,
         CancellationToken cancellationToken = default);
+
     Task<GoalSummaryResult> GetSummaryAsync(
-    CancellationToken cancellationToken = default);
+        Guid ownerId,
+        CancellationToken cancellationToken = default);
 
     Task<Goal?> GetByIdAsync(
+        Guid ownerId,
         int id,
         CancellationToken cancellationToken = default);
 

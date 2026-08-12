@@ -10,12 +10,32 @@ public sealed class GoalActionRepository(
     AppDbContext dbContext)
     : IGoalActionRepository
 {
+    public Task<GoalAction?> GetByIdAsync(
+        Guid ownerId,
+        int goalId,
+        int actionId,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.GoalActions
+            .Include(action => action.Goal)
+            .ThenInclude(goal => goal.Actions)
+            .FirstOrDefaultAsync(
+                action =>
+                    action.Id == actionId &&
+                    action.GoalId == goalId &&
+                    action.Goal.OwnerId == ownerId,
+                cancellationToken);
+    }
+
     public async Task<int> GetNextPositionAsync(
+        Guid ownerId,
         int goalId,
         CancellationToken cancellationToken = default)
     {
         var highestPosition = await dbContext.GoalActions
-            .Where(action => action.GoalId == goalId)
+            .Where(action =>
+                action.GoalId == goalId &&
+                action.Goal.OwnerId == ownerId)
             .Select(action => (int?)action.Position)
             .MaxAsync(cancellationToken);
 

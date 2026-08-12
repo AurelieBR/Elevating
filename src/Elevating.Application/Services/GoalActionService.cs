@@ -1,4 +1,5 @@
 ﻿using Elevating.Application.DTOs.GoalActions;
+using Elevating.Application.Interfaces.Authentication;
 using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Interfaces.Services;
 using Elevating.Domain.Entities;
@@ -11,6 +12,7 @@ namespace Elevating.Application.Services;
 public sealed class GoalActionService(
     IGoalRepository goalRepository,
     IGoalActionRepository goalActionRepository,
+    ICurrentUser currentUser,
     ILogger<GoalActionService> logger)
     : IGoalActionService
 {
@@ -19,6 +21,7 @@ public sealed class GoalActionService(
         CancellationToken cancellationToken = default)
     {
         var goal = await goalRepository.GetByIdAsync(
+            GetRequiredOwnerId(),
             goalId,
             cancellationToken);
 
@@ -40,7 +43,9 @@ public sealed class GoalActionService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        var ownerId = GetRequiredOwnerId();
         var goal = await goalRepository.GetByIdAsync(
+            ownerId,
             goalId,
             cancellationToken);
 
@@ -56,10 +61,10 @@ public sealed class GoalActionService(
             GoalId = goalId,
             Title = request.Title.Trim(),
             Status = GoalActionStatus.Pending,
-            Position =
-                await goalActionRepository.GetNextPositionAsync(
-                    goalId,
-                    cancellationToken),
+            Position = await goalActionRepository.GetNextPositionAsync(
+                ownerId,
+                goalId,
+                cancellationToken),
             CreatedDate = now,
             UpdatedDate = now
         };
@@ -96,14 +101,12 @@ public sealed class GoalActionService(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var goal = await goalRepository.GetByIdAsync(
+        var action = await GetOwnedActionAsync(
             goalId,
+            actionId,
             cancellationToken);
 
-        var action = goal?.Actions.FirstOrDefault(
-            candidate => candidate.Id == actionId);
-
-        if (goal is null || action is null)
+        if (action is null)
         {
             return false;
         }
@@ -112,7 +115,7 @@ public sealed class GoalActionService(
 
         action.Title = request.Title.Trim();
         action.UpdatedDate = now;
-        goal.UpdatedDate = now;
+        action.Goal.UpdatedDate = now;
 
         await goalActionRepository.SaveChangesAsync(
             cancellationToken);
@@ -125,14 +128,12 @@ public sealed class GoalActionService(
         int actionId,
         CancellationToken cancellationToken = default)
     {
-        var goal = await goalRepository.GetByIdAsync(
+        var action = await GetOwnedActionAsync(
             goalId,
+            actionId,
             cancellationToken);
 
-        var action = goal?.Actions.FirstOrDefault(
-            candidate => candidate.Id == actionId);
-
-        if (goal is null || action is null)
+        if (action is null)
         {
             return false;
         }
@@ -142,7 +143,7 @@ public sealed class GoalActionService(
         action.Status = GoalActionStatus.Completed;
         action.UpdatedDate = now;
 
-        SynchronizeGoalStatus(goal, now);
+        SynchronizeGoalStatus(action.Goal, now);
 
         await goalActionRepository.SaveChangesAsync(
             cancellationToken);
@@ -155,14 +156,12 @@ public sealed class GoalActionService(
         int actionId,
         CancellationToken cancellationToken = default)
     {
-        var goal = await goalRepository.GetByIdAsync(
+        var action = await GetOwnedActionAsync(
             goalId,
+            actionId,
             cancellationToken);
 
-        var action = goal?.Actions.FirstOrDefault(
-            candidate => candidate.Id == actionId);
-
-        if (goal is null || action is null)
+        if (action is null)
         {
             return false;
         }
@@ -172,7 +171,7 @@ public sealed class GoalActionService(
         action.Status = GoalActionStatus.Pending;
         action.UpdatedDate = now;
 
-        SynchronizeGoalStatus(goal, now);
+        SynchronizeGoalStatus(action.Goal, now);
 
         await goalActionRepository.SaveChangesAsync(
             cancellationToken);
@@ -185,19 +184,18 @@ public sealed class GoalActionService(
         int actionId,
         CancellationToken cancellationToken = default)
     {
-        var goal = await goalRepository.GetByIdAsync(
+        var action = await GetOwnedActionAsync(
             goalId,
+            actionId,
             cancellationToken);
 
-        var action = goal?.Actions.FirstOrDefault(
-            candidate => candidate.Id == actionId);
-
-        if (goal is null || action is null)
+        if (action is null)
         {
             return false;
         }
 
         var now = DateTime.UtcNow;
+        var goal = action.Goal;
 
         goal.Actions.Remove(action);
         goalActionRepository.Remove(action);
@@ -217,6 +215,29 @@ public sealed class GoalActionService(
         return true;
     }
 
+    private Task<GoalAction?> GetOwnedActionAsync(
+        int goalId,
+        int actionId,
+        CancellationToken cancellationToken)
+    {
+        return goalActionRepository.GetByIdAsync(
+            GetRequiredOwnerId(),
+            goalId,
+            actionId,
+            cancellationToken);
+    }
+
+    private Guid GetRequiredOwnerId()
+    {
+        if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
+        {
+            throw new InvalidOperationException(
+                "An authenticated current user is required for goal action operations.");
+        }
+
+        return currentUser.UserId.Value;
+    }
+
     private static void SynchronizeGoalStatus(
         Goal goal,
         DateTime now)
@@ -228,12 +249,10 @@ public sealed class GoalActionService(
         }
 
         var pendingCount = goal.Actions.Count(
-            action =>
-                action.Status == GoalActionStatus.Pending);
+            action => action.Status == GoalActionStatus.Pending);
 
         var completedCount = goal.Actions.Count(
-            action =>
-                action.Status == GoalActionStatus.Completed);
+            action => action.Status == GoalActionStatus.Completed);
 
         goal.Status = pendingCount == 0
             ? GoalStatus.Completed

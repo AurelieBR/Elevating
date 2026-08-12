@@ -1,10 +1,12 @@
-﻿using Elevating.Domain.Enums;
+using Elevating.Domain.Enums;
 
 namespace Elevating.Domain.Entities;
 
 public sealed class Goal
 {
     public int Id { get; set; }
+
+    public Guid? OwnerId { get; set; }
 
     public required string Title { get; set; }
 

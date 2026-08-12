@@ -2,6 +2,7 @@
 using Elevating.Application.Common.Queries;
 using Elevating.Application.Common.Results;
 using Elevating.Application.DTOs.Goals;
+using Elevating.Application.Interfaces.Authentication;
 using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Interfaces.Services;
 using Elevating.Domain.Entities;
@@ -13,6 +14,7 @@ namespace Elevating.Application.Services;
 
 public sealed class GoalService(
     IGoalRepository goalRepository,
+    ICurrentUser currentUser,
     ILogger<GoalService> logger)
     : IGoalService
 {
@@ -38,6 +40,7 @@ public sealed class GoalService(
             parameters.SortDirection);
 
         var result = await goalRepository.GetPagedAsync(
+            GetRequiredOwnerId(),
             parameters,
             cancellationToken);
 
@@ -64,6 +67,7 @@ public sealed class GoalService(
             "Retrieving goal dashboard summary.");
 
         var summary = await goalRepository.GetSummaryAsync(
+            GetRequiredOwnerId(),
             cancellationToken);
 
         logger.LogInformation(
@@ -88,7 +92,10 @@ public sealed class GoalService(
         int id,
         CancellationToken cancellationToken = default)
     {
-        var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await goalRepository.GetByIdAsync(
+            GetRequiredOwnerId(),
+            id,
+            cancellationToken);
 
         return goal is null
             ? null
@@ -110,6 +117,7 @@ public sealed class GoalService(
 
         var goal = new Goal
         {
+            OwnerId = GetRequiredOwnerId(),
             Title = request.Title.Trim(),
             Category = request.Category.Trim(),
             Description = NormalizeOptionalText(request.Description),
@@ -167,7 +175,10 @@ public sealed class GoalService(
     "Updating goal {GoalId}.",
     id);
 
-        var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await goalRepository.GetByIdAsync(
+            GetRequiredOwnerId(),
+            id,
+            cancellationToken);
 
         if (goal is null)
         {
@@ -206,6 +217,7 @@ public sealed class GoalService(
             id);
 
         var goal = await goalRepository.GetByIdAsync(
+            GetRequiredOwnerId(),
             id,
             cancellationToken);
 
@@ -277,7 +289,10 @@ public sealed class GoalService(
         "Deleting goal {GoalId}.",
         id);
 
-        var goal = await goalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await goalRepository.GetByIdAsync(
+            GetRequiredOwnerId(),
+            id,
+            cancellationToken);
 
         if (goal is null)
         {
@@ -354,5 +369,15 @@ public sealed class GoalService(
         return string.IsNullOrWhiteSpace(value)
             ? null
             : value.Trim();
+    }
+    private Guid GetRequiredOwnerId()
+    {
+        if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
+        {
+            throw new InvalidOperationException(
+                "An authenticated current user is required for goal operations.");
+        }
+
+        return currentUser.UserId.Value;
     }
 }

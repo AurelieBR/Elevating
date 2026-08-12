@@ -1,6 +1,9 @@
-﻿using System.Security.Cryptography;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Cryptography;
 
 using Elevating.Api.IntegrationTests.Controllers;
+using Elevating.Application.DTOs.Authentication;
 using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
 using Elevating.Infrastructure.Persistence;
@@ -9,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +26,7 @@ public sealed class ElevatingApiFactory
 {
     public const string JwtIssuer = "Elevating.Api.Tests";
     public const string JwtAudience = "Elevating.Web.Tests";
+    public const string ValidPassword = "StrongPass1";
 
     private readonly SqliteConnection connection =
         new("Data Source=:memory:");
@@ -58,7 +63,6 @@ public sealed class ElevatingApiFactory
 
         builder.ConfigureServices(services =>
         {
-            
             services.RemoveAll<AppDbContext>();
             services.RemoveAll<DbContextOptions<AppDbContext>>();
             services.RemoveAll<
@@ -97,19 +101,60 @@ public sealed class ElevatingApiFactory
 
         await dbContext.Database.EnsureDeletedAsync();
         await dbContext.Database.EnsureCreatedAsync();
+    }
 
-        dbContext.Goals.AddRange(CreateSeedGoals());
+    public async Task<AuthenticationResponse> RegisterUserAsync(
+        HttpClient client,
+        string email)
+    {
+        var response = await client.PostAsJsonAsync(
+            "/api/auth/register",
+            new RegisterRequest(email, ValidPassword));
 
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content
+            .ReadFromJsonAsync<AuthenticationResponse>()
+            ?? throw new InvalidOperationException(
+                "Registration did not return an authentication response.");
+    }
+
+    public HttpClient CreateAuthenticatedClient(
+        AuthenticationResponse authentication)
+    {
+        var client = CreateClient(
+            new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false
+            });
+
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                authentication.AccessToken);
+
+        return client;
+    }
+
+    public async Task SeedGoalsAsync(Guid ownerId)
+    {
+        using var scope = Services.CreateScope();
+
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<AppDbContext>();
+
+        dbContext.Goals.AddRange(CreateSeedGoals(ownerId));
         await dbContext.SaveChangesAsync();
     }
 
     public async Task<int> AddGoalAsync(
-    string title = "Integration test goal",
-    string category = "Testing",
-    GoalPriority priority = GoalPriority.Medium,
-    GoalStatus status = GoalStatus.NotStarted,
-    DateTime? targetDate = null,
-    bool useDefaultTargetDate = true)
+        Guid ownerId,
+        string title = "Integration test goal",
+        string category = "Testing",
+        GoalPriority priority = GoalPriority.Medium,
+        GoalStatus status = GoalStatus.NotStarted,
+        DateTime? targetDate = null,
+        bool useDefaultTargetDate = true)
     {
         using var scope = Services.CreateScope();
 
@@ -120,6 +165,7 @@ public sealed class ElevatingApiFactory
 
         var goal = new Goal
         {
+            OwnerId = ownerId,
             Title = title,
             Category = category,
             Description = "Created during an integration test.",
@@ -133,12 +179,29 @@ public sealed class ElevatingApiFactory
         };
 
         dbContext.Goals.Add(goal);
-
         await dbContext.SaveChangesAsync();
 
         return goal.Id;
     }
 
+    public async Task AddLegacyGoalAsync(
+        string title = "Legacy anonymous goal")
+    {
+        using var scope = Services.CreateScope();
+
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<AppDbContext>();
+
+        var now = DateTime.UtcNow;
+
+        await dbContext.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT INTO Goals
+                (OwnerId, Title, Category, Description, Priority, Status,
+                 TargetDate, CreatedDate, UpdatedDate)
+            VALUES
+                (NULL, {title}, 'Legacy', NULL, 1, 0, NULL, {now}, {now})
+            """);
+    }
     public async Task<Goal?> FindGoalAsync(int id)
     {
         using var scope = Services.CreateScope();
@@ -151,7 +214,8 @@ public sealed class ElevatingApiFactory
             .FirstOrDefaultAsync(goal => goal.Id == id);
     }
 
-    private static IReadOnlyList<Goal> CreateSeedGoals()
+    private static IReadOnlyList<Goal> CreateSeedGoals(
+        Guid ownerId)
     {
         var now = DateTime.UtcNow;
 
@@ -159,6 +223,7 @@ public sealed class ElevatingApiFactory
         [
             new Goal
             {
+                OwnerId = ownerId,
                 Title = "Build Angular client",
                 Category = "Frontend",
                 Description = "Create the Angular user interface.",
@@ -170,6 +235,7 @@ public sealed class ElevatingApiFactory
             },
             new Goal
             {
+                OwnerId = ownerId,
                 Title = "Complete integration tests",
                 Category = "Testing",
                 Description = "Test the complete HTTP API pipeline.",
@@ -181,6 +247,7 @@ public sealed class ElevatingApiFactory
             },
             new Goal
             {
+                OwnerId = ownerId,
                 Title = "Add API documentation",
                 Category = "Documentation",
                 Description = "Document all available endpoints.",
@@ -192,6 +259,7 @@ public sealed class ElevatingApiFactory
             },
             new Goal
             {
+                OwnerId = ownerId,
                 Title = "Implement pagination",
                 Category = "Development",
                 Description = "Add paginated goal retrieval.",
@@ -203,6 +271,7 @@ public sealed class ElevatingApiFactory
             },
             new Goal
             {
+                OwnerId = ownerId,
                 Title = "Implement filtering",
                 Category = "Development",
                 Description = "Filter goals by query parameters.",

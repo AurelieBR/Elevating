@@ -4,7 +4,14 @@ namespace Elevating.Application.Interfaces.Repositories;
 
 public interface IGoalActionRepository
 {
+    Task<GoalAction?> GetByIdAsync(
+        Guid ownerId,
+        int goalId,
+        int actionId,
+        CancellationToken cancellationToken = default);
+
     Task<int> GetNextPositionAsync(
+        Guid ownerId,
         int goalId,
         CancellationToken cancellationToken = default);
 
