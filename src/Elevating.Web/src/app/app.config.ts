@@ -1,12 +1,16 @@
 import {
   ApplicationConfig,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 
+import { AuthService } from './core/auth/auth.service';
+import { authInterceptor } from './core/auth/auth.interceptor';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -17,6 +21,9 @@ export const appConfig: ApplicationConfig = {
     }),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideAppInitializer(() => {
+      inject(AuthService).initializeSession().subscribe();
+    }),
   ],
 };

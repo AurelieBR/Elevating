@@ -1,1 +1,19 @@
-<p>header works!</p>
+<header class="border-b border-line bg-surface/90 backdrop-blur">
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
+  >
+    <a routerLink="/" class="app-heading text-3xl" aria-label="Elevating goals">Elevating</a>
+
+    <div class="flex items-center justify-between gap-4 sm:justify-end">
+      @if (auth.currentUser(); as user) {
+        <span class="max-w-52 truncate text-sm text-muted" [title]="user.email">
+          {{ user.email }}
+        </span>
+      }
+
+      <button type="button" class="btn-ghost" [disabled]="loggingOut()" (click)="logout()">
+        {{ loggingOut() ? 'Signing out...' : 'Sign out' }}
+      </button>
+    </div>
+  </div>
+</header>

@@ -57,7 +57,8 @@ public sealed class ElevatingApiFactory
                     ["Jwt:Audience"] = JwtAudience,
                     ["Jwt:AccessTokenMinutes"] = "15",
                     ["Jwt:PrivateKeyPem"] = JwtPrivateKeyPem,
-                    ["Jwt:PublicKeyPem"] = JwtPublicKeyPem
+                    ["Jwt:PublicKeyPem"] = JwtPublicKeyPem,
+                    ["Cors:AllowedOrigins:0"] = "http://localhost:4200"
                 });
         });
 
