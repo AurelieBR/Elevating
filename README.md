@@ -244,6 +244,24 @@ Apply the database migrations from the repository root:
 dotnet ef database update --project .\src\Elevating.Infrastructure --startup-project .\src\Elevating.Api
 ```
 
+### Configure Local JWT Signing
+
+The API signs access tokens with an RSA private key and validates them with the matching public key. Generate an ephemeral local key pair in memory and store it in .NET user secrets:
+
+```powershell
+$jwtRsa = [System.Security.Cryptography.RSA]::Create()
+$jwtRsa.KeySize = 2048
+$jwtPrivateKeyPem = $jwtRsa.ExportPkcs8PrivateKeyPem()
+$jwtPublicKeyPem = $jwtRsa.ExportSubjectPublicKeyInfoPem()
+
+dotnet user-secrets set "Jwt:PrivateKeyPem" $jwtPrivateKeyPem --project .\src\Elevating.Api
+dotnet user-secrets set "Jwt:PublicKeyPem" $jwtPublicKeyPem --project .\src\Elevating.Api
+
+$jwtRsa.Dispose()
+```
+
+Do not add either key to an appsettings file or source control. Production should provide `Jwt__PrivateKeyPem` and `Jwt__PublicKeyPem` through Azure Container Apps secret-backed environment variables.
+
 ### Run the API
 
 Navigate to the API project:

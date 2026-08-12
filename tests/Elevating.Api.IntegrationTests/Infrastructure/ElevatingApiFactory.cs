@@ -1,4 +1,7 @@
-﻿using Elevating.Domain.Entities;
+﻿using System.Security.Cryptography;
+
+using Elevating.Api.IntegrationTests.Controllers;
+using Elevating.Domain.Entities;
 using Elevating.Domain.Enums;
 using Elevating.Infrastructure.Persistence;
 
@@ -7,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -16,13 +20,41 @@ public sealed class ElevatingApiFactory
     : WebApplicationFactory<Program>,
       IAsyncLifetime
 {
+    public const string JwtIssuer = "Elevating.Api.Tests";
+    public const string JwtAudience = "Elevating.Web.Tests";
+
     private readonly SqliteConnection connection =
         new("Data Source=:memory:");
+
+    public ElevatingApiFactory()
+    {
+        using var rsa = RSA.Create(2048);
+
+        JwtPrivateKeyPem = rsa.ExportPkcs8PrivateKeyPem();
+        JwtPublicKeyPem = rsa.ExportSubjectPublicKeyInfoPem();
+    }
+
+    public string JwtPrivateKeyPem { get; }
+
+    public string JwtPublicKeyPem { get; }
 
     protected override void ConfigureWebHost(
         IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            configuration.AddInMemoryCollection(
+                new Dictionary<string, string?>
+                {
+                    ["Jwt:Issuer"] = JwtIssuer,
+                    ["Jwt:Audience"] = JwtAudience,
+                    ["Jwt:AccessTokenMinutes"] = "15",
+                    ["Jwt:PrivateKeyPem"] = JwtPrivateKeyPem,
+                    ["Jwt:PublicKeyPem"] = JwtPublicKeyPem
+                });
+        });
 
         builder.ConfigureServices(services =>
         {
@@ -36,6 +68,11 @@ public sealed class ElevatingApiFactory
             {
                 options.UseSqlite(connection);
             });
+
+            services
+                .AddControllers()
+                .AddApplicationPart(
+                    typeof(ProtectedTestController).Assembly);
         });
     }
 
