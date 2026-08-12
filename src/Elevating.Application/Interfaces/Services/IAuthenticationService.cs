@@ -12,4 +12,16 @@ public interface IAuthenticationService
     Task<AuthenticationResult> LoginAsync(
         LoginRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<AuthenticationResult> RefreshAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default);
+
+    Task LogoutAsync(
+        string? refreshToken,
+        CancellationToken cancellationToken = default);
+
+    Task<CurrentUserResponse?> GetCurrentUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

@@ -44,6 +44,21 @@ public sealed class IdentityService(
                 : AuthenticationStatus.Failed);
     }
 
+    public async Task<AuthenticatedUser?> FindByIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var user = await userManager.FindByIdAsync(userId.ToString());
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return user is null || string.IsNullOrWhiteSpace(user.Email)
+            ? null
+            : new AuthenticatedUser(user.Id, user.Email);
+    }
+
     public async Task<UserIdentityResult> ValidateCredentialsAsync(
         string email,
         string password,

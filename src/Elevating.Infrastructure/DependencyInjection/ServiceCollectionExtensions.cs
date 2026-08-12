@@ -57,10 +57,21 @@ public static class ServiceCollectionExtensions
             IValidateOptions<JwtOptions>,
             JwtOptionsValidator>();
 
+        services
+            .AddOptions<RefreshTokenOptions>()
+            .Bind(configuration.GetSection(
+                RefreshTokenOptions.SectionName))
+            .ValidateOnStart();
+
+        services.AddSingleton<
+            IValidateOptions<RefreshTokenOptions>,
+            RefreshTokenOptionsValidator>();
+
         services.TryAddSingleton<TimeProvider>(TimeProvider.System);
 
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IAccessTokenService, JwtAccessTokenService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
         services.AddScoped<IGoalRepository, GoalRepository>();
 

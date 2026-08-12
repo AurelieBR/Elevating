@@ -1,8 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 
+using Elevating.Api.Authentication;
 using Elevating.Api.ExceptionHandling;
 using Elevating.Application.DependencyInjection;
+using Elevating.Application.Interfaces.Authentication;
 using Elevating.Infrastructure.Authentication;
 using Elevating.Infrastructure.DependencyInjection;
 
@@ -38,6 +40,25 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+builder.Services.AddScoped<
+    IRefreshTokenCookieService,
+    RefreshTokenCookieService>();
+
+builder.Services
+    .AddOptions<RefreshCookieOptions>()
+    .Bind(builder.Configuration.GetSection(
+        RefreshCookieOptions.SectionName))
+    .Validate(
+        options =>
+            !string.IsNullOrWhiteSpace(options.Name) &&
+            !string.IsNullOrWhiteSpace(options.Path) &&
+            options.Path.StartsWith('/') &&
+            Enum.IsDefined(typeof(SameSiteMode), options.SameSite),
+        "RefreshCookie configuration is invalid.")
+    .ValidateOnStart();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
