@@ -1,9 +1,12 @@
-﻿using Elevating.Application.Common.Authentication;
+﻿using Elevating.Api.Authentication;
+using Elevating.Application.Common.Authentication;
 using Elevating.Application.DTOs.Authentication;
+using Elevating.Application.Interfaces.Authentication;
 using Elevating.Application.Interfaces.Services;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Elevating.Api.Controllers;
@@ -12,6 +15,8 @@ namespace Elevating.Api.Controllers;
 [Route("api/auth")]
 public sealed class AuthController(
     IAuthenticationService authenticationService,
+    IRefreshTokenCookieService refreshTokenCookieService,
+    ICurrentUser currentUser,
     IValidator<RegisterRequest> registerValidator,
     IValidator<LoginRequest> loginValidator)
     : ControllerBase
@@ -48,7 +53,7 @@ public sealed class AuthController(
         return result.Status switch
         {
             AuthenticationStatus.Succeeded =>
-                Ok(result.Response),
+                CompleteAuthentication(result),
 
             AuthenticationStatus.DuplicateEmail =>
                 Conflict(new ProblemDetails
@@ -98,12 +103,109 @@ public sealed class AuthController(
             cancellationToken);
 
         return result.Status == AuthenticationStatus.Succeeded
-            ? Ok(result.Response)
-            : Unauthorized(new ProblemDetails
-            {
-                Status = StatusCodes.Status401Unauthorized,
-                Title = "Authentication failed",
-                Detail = "Invalid email or password."
-            });
+            ? CompleteAuthentication(result)
+            : LoginFailed();
+    }
+
+    [HttpPost("refresh")]
+    [ProducesResponseType(
+        typeof(AuthenticationResponse),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(ProblemDetails),
+        StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthenticationResponse>> Refresh(
+        CancellationToken cancellationToken)
+    {
+        var refreshToken = refreshTokenCookieService.Read(Request);
+
+        var result = await authenticationService.RefreshAsync(
+            refreshToken ?? string.Empty,
+            cancellationToken);
+
+        if (result.Status != AuthenticationStatus.Succeeded)
+        {
+            refreshTokenCookieService.Clear(Response);
+            return SessionFailed();
+        }
+
+        return CompleteAuthentication(result);
+    }
+
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Logout(
+        CancellationToken cancellationToken)
+    {
+        var refreshToken = refreshTokenCookieService.Read(Request);
+
+        await authenticationService.LogoutAsync(
+            refreshToken,
+            cancellationToken);
+
+        refreshTokenCookieService.Clear(Response);
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    [ProducesResponseType(
+        typeof(CurrentUserResponse),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<CurrentUserResponse>> Me(
+        CancellationToken cancellationToken)
+    {
+        if (!currentUser.IsAuthenticated ||
+            !currentUser.UserId.HasValue)
+        {
+            return Unauthorized();
+        }
+
+        var user = await authenticationService.GetCurrentUserAsync(
+            currentUser.UserId.Value,
+            cancellationToken);
+
+        return user is null
+            ? Unauthorized()
+            : Ok(user);
+    }
+
+    private ActionResult<AuthenticationResponse>
+        CompleteAuthentication(AuthenticationResult result)
+    {
+        if (result.Response is null || result.RefreshToken is null)
+        {
+            throw new InvalidOperationException(
+                "A successful authentication result requires " +
+                "access and refresh tokens.");
+        }
+
+        refreshTokenCookieService.Write(
+            Response,
+            result.RefreshToken);
+
+        return Ok(result.Response);
+    }
+
+    private UnauthorizedObjectResult LoginFailed()
+    {
+        return Unauthorized(new ProblemDetails
+        {
+            Status = StatusCodes.Status401Unauthorized,
+            Title = "Authentication failed",
+            Detail = "Invalid email or password."
+        });
+    }
+
+    private UnauthorizedObjectResult SessionFailed()
+    {
+        return Unauthorized(new ProblemDetails
+        {
+            Status = StatusCodes.Status401Unauthorized,
+            Title = "Authentication failed",
+            Detail = "Invalid authentication session."
+        });
     }
 }

@@ -262,6 +262,10 @@ $jwtRsa.Dispose()
 
 Do not add either key to an appsettings file or source control. Production should provide `Jwt__PrivateKeyPem` and `Jwt__PublicKeyPem` through Azure Container Apps secret-backed environment variables.
 
+Refresh sessions use a Secure HttpOnly cookie scoped to `/api/auth`. The cookie defaults to `SameSite=None` for the separately hosted SPA and API. When Angular authentication is added, browser requests must opt into credentials and API CORS must add `AllowCredentials()` only for explicit configured origins; never combine credentials with `AllowAnyOrigin()`.
+
+Logout revokes the refresh token and clears its cookie. An already issued access token is not blacklisted and can remain valid until its short expiration.
+
 ### Run the API
 
 Navigate to the API project:

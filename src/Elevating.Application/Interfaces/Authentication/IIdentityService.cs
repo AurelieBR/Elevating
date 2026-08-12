@@ -13,4 +13,8 @@ public interface IIdentityService
         string email,
         string password,
         CancellationToken cancellationToken = default);
+
+    Task<AuthenticatedUser?> FindByIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

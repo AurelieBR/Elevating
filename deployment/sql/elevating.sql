@@ -218,3 +218,59 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812004856_AddRefreshTokens'
+)
+BEGIN
+    CREATE TABLE [RefreshTokens] (
+        [Id] uniqueidentifier NOT NULL,
+        [UserId] uniqueidentifier NOT NULL,
+        [TokenHash] char(64) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [ExpiresAtUtc] datetimeoffset NOT NULL,
+        [RevokedAtUtc] datetimeoffset NULL,
+        [ReplacedByTokenId] uniqueidentifier NULL,
+        CONSTRAINT [PK_RefreshTokens] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_RefreshTokens_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_RefreshTokens_RefreshTokens_ReplacedByTokenId] FOREIGN KEY ([ReplacedByTokenId]) REFERENCES [RefreshTokens] ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812004856_AddRefreshTokens'
+)
+BEGIN
+    CREATE INDEX [IX_RefreshTokens_ReplacedByTokenId] ON [RefreshTokens] ([ReplacedByTokenId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812004856_AddRefreshTokens'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_RefreshTokens_TokenHash] ON [RefreshTokens] ([TokenHash]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812004856_AddRefreshTokens'
+)
+BEGIN
+    CREATE INDEX [IX_RefreshTokens_UserId] ON [RefreshTokens] ([UserId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812004856_AddRefreshTokens'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260812004856_AddRefreshTokens', N'10.0.10');
+END;
+
+COMMIT;
+GO
+
