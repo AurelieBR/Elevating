@@ -1,6 +1,7 @@
 ﻿using Elevating.Application.Common.Queries;
 using Elevating.Application.Common.Results;
 using Elevating.Application.DTOs.Goals;
+using Elevating.Application.Interfaces.Authentication;
 using Elevating.Application.Interfaces.Repositories;
 using Elevating.Application.Services;
 using Elevating.Domain.Entities;
@@ -15,15 +16,25 @@ namespace Elevating.Application.Tests.Services;
 
 public sealed class GoalServiceTests
 {
+    private static readonly Guid OwnerId = Guid.NewGuid();
+
     private readonly Mock<IGoalRepository> goalRepositoryMock;
+    private readonly Mock<ICurrentUser> currentUserMock;
     private readonly GoalService goalService;
 
     public GoalServiceTests()
     {
         goalRepositoryMock = new Mock<IGoalRepository>();
+        currentUserMock = new Mock<ICurrentUser>();
+
+        currentUserMock.SetupGet(user => user.IsAuthenticated)
+            .Returns(true);
+        currentUserMock.SetupGet(user => user.UserId)
+            .Returns(OwnerId);
 
         goalService = new GoalService(
             goalRepositoryMock.Object,
+            currentUserMock.Object,
             NullLogger<GoalService>.Instance);
     }
 
@@ -55,6 +66,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetPagedAsync(
+                OwnerId,
                 parameters,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((goals, 6));
@@ -77,6 +89,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock.Verify(
             repository => repository.GetPagedAsync(
+                OwnerId,
                 parameters,
                 It.IsAny<CancellationToken>()),
             Times.Once);
@@ -95,6 +108,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetSummaryAsync(
+                OwnerId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(repositoryResult);
 
@@ -110,6 +124,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock.Verify(
             repository => repository.GetSummaryAsync(
+                OwnerId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -124,6 +139,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 10,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(goal);
@@ -147,6 +163,7 @@ public sealed class GoalServiceTests
         // Arrange
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 999,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Goal?)null);
@@ -194,6 +211,7 @@ public sealed class GoalServiceTests
         // Assert
         Assert.NotNull(capturedGoal);
 
+        Assert.Equal(OwnerId, capturedGoal.OwnerId);
         Assert.Equal("Learn Angular", capturedGoal.Title);
         Assert.Equal("Development", capturedGoal.Category);
         Assert.Equal(
@@ -282,6 +300,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 12,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(goal);
@@ -325,6 +344,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 999,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Goal?)null);
@@ -356,6 +376,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 7,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(goal);
@@ -385,6 +406,7 @@ public sealed class GoalServiceTests
         // Arrange
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 999,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Goal?)null);
@@ -411,6 +433,7 @@ public sealed class GoalServiceTests
 
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 15,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(goal);
@@ -442,6 +465,7 @@ public sealed class GoalServiceTests
         // Arrange
         goalRepositoryMock
             .Setup(repository => repository.GetByIdAsync(
+                OwnerId,
                 999,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Goal?)null);
@@ -472,6 +496,7 @@ public sealed class GoalServiceTests
         return new Goal
         {
             Id = id,
+            OwnerId = OwnerId,
             Title = title,
             Category = "Development",
             Description = "Test goal description",

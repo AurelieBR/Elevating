@@ -274,3 +274,40 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812145220_AddGoalOwnership'
+)
+BEGIN
+    ALTER TABLE [Goals] ADD [OwnerId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812145220_AddGoalOwnership'
+)
+BEGIN
+    CREATE INDEX [IX_Goals_OwnerId] ON [Goals] ([OwnerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812145220_AddGoalOwnership'
+)
+BEGIN
+    ALTER TABLE [Goals] ADD CONSTRAINT [FK_Goals_AspNetUsers_OwnerId] FOREIGN KEY ([OwnerId]) REFERENCES [AspNetUsers] ([Id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260812145220_AddGoalOwnership'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260812145220_AddGoalOwnership', N'10.0.10');
+END;
+
+COMMIT;
+GO
+

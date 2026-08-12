@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 using Elevating.Api.IntegrationTests.Infrastructure;
 using Elevating.Application.Common.Pagination;
+using Elevating.Application.DTOs.Authentication;
 using Elevating.Application.DTOs.Goals;
 using Elevating.Domain.Enums;
 
@@ -46,7 +47,7 @@ public sealed class GoalsControllerTests
     public async Task GetAll_ShouldReturnPaginatedGoals()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         // Act
         var response = await client.GetAsync(
@@ -73,7 +74,7 @@ public sealed class GoalsControllerTests
     public async Task GetAll_WithFiltering_ShouldReturnMatchingGoals()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         // Act
         var response = await client.GetAsync(
@@ -103,7 +104,7 @@ public sealed class GoalsControllerTests
     public async Task GetAll_WithSorting_ShouldReturnGoalsInRequestedOrder()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         // Act
         var response = await client.GetAsync(
@@ -136,7 +137,7 @@ public sealed class GoalsControllerTests
     public async Task GetSummary_ShouldReturnGoalTotals()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         // Act
         var response = await client.GetAsync(
@@ -163,31 +164,36 @@ public sealed class GoalsControllerTests
     public async Task GetSummary_ShouldCountOnlyOverdueIncompleteGoals()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var today = DateTime.UtcNow.Date;
 
         await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Overdue not started goal",
             status: GoalStatus.NotStarted,
             targetDate: today.AddDays(-2));
 
         await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Overdue in-progress goal",
             status: GoalStatus.InProgress,
             targetDate: today.AddDays(-1));
 
         await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Completed past-due goal",
             status: GoalStatus.Completed,
             targetDate: today.AddDays(-3));
 
         await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Goal due today",
             status: GoalStatus.NotStarted,
             targetDate: today);
 
         await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Goal without target date",
             status: GoalStatus.InProgress,
             targetDate: null,
@@ -219,9 +225,10 @@ public sealed class GoalsControllerTests
     public async Task GetById_WhenGoalExists_ShouldReturnGoal()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var id = await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Retrieve this goal");
 
         // Act
@@ -244,7 +251,7 @@ public sealed class GoalsControllerTests
     public async Task GetById_WhenGoalDoesNotExist_ShouldReturnNotFound()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         // Act
         var response = await client.GetAsync(
@@ -260,7 +267,7 @@ public sealed class GoalsControllerTests
     public async Task Create_WithValidRequest_ShouldReturnCreatedGoal()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var request = new CreateGoalRequest(
             Title: "Create Angular dashboard",
@@ -308,7 +315,7 @@ public sealed class GoalsControllerTests
     public async Task Create_WithInvalidRequest_ShouldReturnBadRequest()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var request = new CreateGoalRequest(
             Title: string.Empty,
@@ -339,9 +346,10 @@ public sealed class GoalsControllerTests
     public async Task Update_WhenGoalExists_ShouldReturnNoContentAndUpdateDatabase()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var id = await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Original title");
 
         var request = new UpdateGoalRequest(
@@ -379,7 +387,7 @@ public sealed class GoalsControllerTests
     public async Task Update_WhenGoalDoesNotExist_ShouldReturnNotFound()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var request = new UpdateGoalRequest(
             Title: "Missing goal",
@@ -404,9 +412,10 @@ public sealed class GoalsControllerTests
     public async Task Complete_WhenGoalExists_ShouldMarkGoalCompleted()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var id = await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Complete this goal",
             status: GoalStatus.InProgress);
 
@@ -433,9 +442,10 @@ public sealed class GoalsControllerTests
     public async Task Delete_WhenGoalExists_ShouldRemoveGoal()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         var id = await factory.AddGoalAsync(
+            authentication.UserId,
             title: "Delete this goal");
 
         // Act
@@ -457,7 +467,7 @@ public sealed class GoalsControllerTests
     public async Task Delete_WhenGoalDoesNotExist_ShouldReturnNotFound()
     {
         // Arrange
-        await factory.ResetDatabaseAsync();
+        var authentication = await AuthenticateAsync();
 
         // Act
         var response = await client.DeleteAsync(
@@ -467,5 +477,22 @@ public sealed class GoalsControllerTests
         Assert.Equal(
             HttpStatusCode.NotFound,
             response.StatusCode);
+    }
+    private async Task<AuthenticationResponse> AuthenticateAsync()
+    {
+        await factory.ResetDatabaseAsync();
+
+        var authentication = await factory.RegisterUserAsync(
+            client,
+            "goals.user@example.com");
+
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue(
+                "Bearer",
+                authentication.AccessToken);
+
+        await factory.SeedGoalsAsync(authentication.UserId);
+
+        return authentication;
     }
 }

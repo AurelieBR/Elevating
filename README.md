@@ -456,6 +456,17 @@ dotnet ef migrations script --idempotent --project .\src\Elevating.Infrastructur
 
 The generated script uses EF Core migration history to apply only missing migrations.
 
+### Goal ownership cutover
+
+`AddGoalOwnership` intentionally creates `Goals.OwnerId` as nullable in Azure SQL so pre-authentication Goals remain intact. During this transition, the Domain property and EF mapping are also nullable so the model snapshot truthfully represents the database schema. The application still requires and assigns a real authenticated user to every new Goal and excludes null-owner legacy rows from all Goal and GoalAction queries.
+
+Before creating the follow-up migration that makes `OwnerId` non-nullable:
+
+1. Inventory every `Goals` row where `OwnerId IS NULL`.
+2. Use an explicitly reviewed production decision to backfill each row to a verified user, archive/delete it, or reset the legacy data. Never assign rows to the first user or to `Guid.Empty`.
+3. Verify no null owners remain and every owner references an existing `AspNetUsers.Id`.
+4. Create a separate EF migration that alters `OwnerId` to `NOT NULL` without a default value, regenerate `deployment/sql/elevating.sql`, and review the generated SQL before deployment.
+
 ## Design
 
 Elevating uses a calm, earthy visual identity designed to feel motivating, elegant, and professional.

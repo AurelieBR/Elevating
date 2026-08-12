@@ -6,11 +6,13 @@ using Elevating.Application.Interfaces.Services;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Elevating.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public sealed class GoalsController(
     IGoalService goalService,
