@@ -13,6 +13,7 @@ public sealed class GoalRepository(AppDbContext dbContext)
 {
     public async Task<(IReadOnlyList<Goal> Items, int TotalCount)>
         GetPagedAsync(
+            Guid ownerId,
             GoalQueryParameters parameters,
             CancellationToken cancellationToken = default)
     {
@@ -20,6 +21,7 @@ public sealed class GoalRepository(AppDbContext dbContext)
 
         var query = dbContext.Goals
             .AsNoTracking()
+            .Where(goal => goal.OwnerId == ownerId)
             .Include(goal => goal.Actions)
             .AsQueryable();
 
@@ -81,12 +83,14 @@ public sealed class GoalRepository(AppDbContext dbContext)
     }
 
     public async Task<GoalSummaryResult> GetSummaryAsync(
-    CancellationToken cancellationToken = default)
+        Guid ownerId,
+        CancellationToken cancellationToken = default)
     {
         var today = DateTime.UtcNow.Date;
 
         var summary = await dbContext.Goals
             .AsNoTracking()
+            .Where(goal => goal.OwnerId == ownerId)
             .GroupBy(_ => 1)
             .Select(group => new GoalSummaryResult(
                 group.Count(),
@@ -108,13 +112,14 @@ public sealed class GoalRepository(AppDbContext dbContext)
     }
 
     public Task<Goal?> GetByIdAsync(
+        Guid ownerId,
         int id,
         CancellationToken cancellationToken = default)
     {
         return dbContext.Goals
             .Include(goal => goal.Actions)
             .FirstOrDefaultAsync(
-                goal => goal.Id == id,
+                goal => goal.Id == id && goal.OwnerId == ownerId,
                 cancellationToken);
     }
 

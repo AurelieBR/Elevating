@@ -19,6 +19,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IGoalActionService, GoalActionService>();
 
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+
         services.AddValidatorsFromAssemblyContaining<
             CreateGoalRequestValidator>();
 

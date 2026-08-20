@@ -244,6 +244,28 @@ Apply the database migrations from the repository root:
 dotnet ef database update --project .\src\Elevating.Infrastructure --startup-project .\src\Elevating.Api
 ```
 
+### Configure Local JWT Signing
+
+The API signs access tokens with an RSA private key and validates them with the matching public key. Generate an ephemeral local key pair in memory and store it in .NET user secrets:
+
+```powershell
+$jwtRsa = [System.Security.Cryptography.RSA]::Create()
+$jwtRsa.KeySize = 2048
+$jwtPrivateKeyPem = $jwtRsa.ExportPkcs8PrivateKeyPem()
+$jwtPublicKeyPem = $jwtRsa.ExportSubjectPublicKeyInfoPem()
+
+dotnet user-secrets set "Jwt:PrivateKeyPem" $jwtPrivateKeyPem --project .\src\Elevating.Api
+dotnet user-secrets set "Jwt:PublicKeyPem" $jwtPublicKeyPem --project .\src\Elevating.Api
+
+$jwtRsa.Dispose()
+```
+
+Do not add either key to an appsettings file or source control. Production should provide `Jwt__PrivateKeyPem` and `Jwt__PublicKeyPem` through Azure Container Apps secret-backed environment variables.
+
+Refresh sessions use a Secure HttpOnly cookie scoped to `/api/auth`. The cookie defaults to `SameSite=None` for the separately hosted SPA and API. When Angular authentication is added, browser requests must opt into credentials and API CORS must add `AllowCredentials()` only for explicit configured origins; never combine credentials with `AllowAnyOrigin()`.
+
+Logout revokes the refresh token and clears its cookie. An already issued access token is not blacklisted and can remain valid until its short expiration.
+
 ### Run the API
 
 Navigate to the API project:
@@ -433,6 +455,17 @@ dotnet ef migrations script --idempotent --project .\src\Elevating.Infrastructur
 ```
 
 The generated script uses EF Core migration history to apply only missing migrations.
+
+### Goal ownership cutover
+
+`AddGoalOwnership` intentionally creates `Goals.OwnerId` as nullable in Azure SQL so pre-authentication Goals remain intact. During this transition, the Domain property and EF mapping are also nullable so the model snapshot truthfully represents the database schema. The application still requires and assigns a real authenticated user to every new Goal and excludes null-owner legacy rows from all Goal and GoalAction queries.
+
+Before creating the follow-up migration that makes `OwnerId` non-nullable:
+
+1. Inventory every `Goals` row where `OwnerId IS NULL`.
+2. Use an explicitly reviewed production decision to backfill each row to a verified user, archive/delete it, or reset the legacy data. Never assign rows to the first user or to `Guid.Empty`.
+3. Verify no null owners remain and every owner references an existing `AspNetUsers.Id`.
+4. Create a separate EF migration that alters `OwnerId` to `NOT NULL` without a default value, regenerate `deployment/sql/elevating.sql`, and review the generated SQL before deployment.
 
 ## Design
 
