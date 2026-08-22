@@ -1,0 +1,14 @@
+:host,
+.marketing-shell {
+  display: block;
+  min-height: 100vh;
+}
+
+.marketing-shell {
+  display: flex;
+  flex-direction: column;
+}
+
+router-outlet + * {
+  flex: 1;
+}

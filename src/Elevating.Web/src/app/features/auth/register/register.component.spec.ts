@@ -48,7 +48,7 @@ describe('Register', () => {
       email: 'alice@example.com',
       password: 'StrongPass1',
     });
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/goals');
   });
 
   it('enforces the backend password policy for UX validation', () => {

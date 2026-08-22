@@ -1,17 +1,1 @@
-@if (auth.authStatus() === 'checking') {
-  <main class="app-page flex min-h-screen items-center justify-center px-4" aria-busy="true">
-    <div class="text-center">
-      <div
-        class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-brand-soft border-t-brand"
-        aria-hidden="true"
-      ></div>
-      <p class="mt-4 text-sm font-medium text-ink-soft">Restoring your session...</p>
-    </div>
-  </main>
-} @else {
-  @if (auth.isAuthenticated()) {
-    <app-header />
-  }
-
-  <router-outlet />
-}
+<router-outlet />

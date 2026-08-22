@@ -39,6 +39,17 @@ describe('Header', () => {
     expect(fixture.nativeElement.textContent).toContain('alice@example.com');
   });
 
+  it('uses the real brand asset and links back to /goals', () => {
+    fixture.detectChanges();
+
+    const brand = fixture.nativeElement.querySelector('.app-brand') as HTMLAnchorElement;
+    const logo = brand.querySelector('img') as HTMLImageElement;
+
+    expect(brand.getAttribute('href')).toBe('/goals');
+    expect(logo.getAttribute('src')).toBe('/brand/elevating-stepped-logo.png');
+    expect(logo.getAttribute('width')).toBe('46');
+  });
+
   it('logs out and navigates to login', () => {
     vi.spyOn(router, 'navigate').mockResolvedValue(true);
 

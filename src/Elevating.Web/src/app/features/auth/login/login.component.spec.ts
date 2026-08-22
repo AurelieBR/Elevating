@@ -1,6 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  ParamMap,
+  provideRouter,
+  Router,
+} from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from '../../../core/auth/auth.service';
@@ -19,9 +25,11 @@ describe('Login', () => {
   let component: Login;
   let fixture: ComponentFixture<Login>;
   let router: Router;
+  let queryParamMap: ParamMap;
 
   beforeEach(async () => {
     auth.login.mockReset();
+    queryParamMap = convertToParamMap({ returnUrl: '/goals/42' });
 
     await TestBed.configureTestingModule({
       imports: [Login],
@@ -32,7 +40,9 @@ describe('Login', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              queryParamMap: convertToParamMap({ returnUrl: '/goals/42' }),
+              get queryParamMap() {
+                return queryParamMap;
+              },
             },
           },
         },
@@ -60,6 +70,37 @@ describe('Login', () => {
     });
     expect(router.navigateByUrl).toHaveBeenCalledWith('/goals/42');
   });
+
+  it('falls back to /goals when no return URL is provided', () => {
+    queryParamMap = convertToParamMap({});
+    auth.login.mockReturnValue(of(user));
+    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    component.form.setValue({
+      email: 'alice@example.com',
+      password: 'StrongPass1',
+    });
+
+    component.submit();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/goals');
+  });
+
+  it.each(['https://example.com/steal', '//example.com/steal'])(
+    'rejects unsafe return URL %s and falls back to /goals',
+    (unsafeReturnUrl) => {
+      queryParamMap = convertToParamMap({ returnUrl: unsafeReturnUrl });
+      auth.login.mockReturnValue(of(user));
+      vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+      component.form.setValue({
+        email: 'alice@example.com',
+        password: 'StrongPass1',
+      });
+
+      component.submit();
+
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/goals');
+    },
+  );
 
   it('shows a generic invalid-credentials error', () => {
     auth.login.mockReturnValue(

@@ -13,10 +13,10 @@ export const guestGuard: CanActivateFn = () => {
   }
 
   if (auth.authStatus() === 'authenticated') {
-    return router.createUrlTree(['/']);
+    return router.createUrlTree(['/goals']);
   }
 
   return auth
     .whenInitialized()
-    .pipe(map((status) => (status === 'anonymous' ? true : router.createUrlTree(['/']))));
+    .pipe(map((status) => (status === 'anonymous' ? true : router.createUrlTree(['/goals']))));
 };

@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+nav a {
+  border-radius: 0.5rem;
+  transition: color 160ms ease;
+}
+
+nav a:hover {
+  color: var(--color-brand-hover);
+}

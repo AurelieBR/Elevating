@@ -1,7 +1,7 @@
 <main class="app-page">
   <div class="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
     <a
-      routerLink="/"
+      routerLink="/goals"
       class="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-brand"
     >
       <span aria-hidden="true">←</span>
@@ -117,7 +117,7 @@
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           <button type="button" (click)="retry()" class="btn-danger">Try again</button>
 
-          <a routerLink="/" class="btn-secondary"> Return to goals </a>
+          <a routerLink="/goals" class="btn-secondary"> Return to goals </a>
         </div>
       </section>
     } @else if (goal(); as currentGoal) {
