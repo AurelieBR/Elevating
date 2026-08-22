@@ -1,0 +1,132 @@
+<main>
+  <section class="marketing-section" aria-labelledby="features-title">
+    <div class="marketing-container features-hero">
+      <div>
+        <p class="app-eyebrow">Features</p>
+        <h1 id="features-title" class="app-heading features-title mt-5">
+          Everything you need to grow with clarity.
+        </h1>
+        <p class="app-copy mt-6 max-w-2xl text-lg">
+          Elevating keeps goal planning simple: define what matters, break it into actions, and keep
+          an eye on progress without losing the bigger picture.
+        </p>
+      </div>
+
+      <div class="photo-frame">
+        <img
+          src="/images/marketing/features-workspace.webp"
+          width="1365"
+          height="2046"
+          alt="Laptop, planner, coffee and flowers on a wooden desk"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-surface/65 py-14 sm:py-20" aria-labelledby="feature-set-title">
+    <div class="marketing-container">
+      <div class="max-w-2xl">
+        <p class="app-eyebrow">The essentials, connected</p>
+        <h2 id="feature-set-title" class="marketing-heading mt-4">
+          Keep goals practical from the first thought to the next action.
+        </h2>
+      </div>
+
+      <div class="feature-grid mt-9">
+        <article class="feature-card">
+          <span class="feature-number">01</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Goal planning</h3>
+          <p class="app-copy mt-3 text-sm">
+            Capture a title, category, priority, target date and the context that makes the goal
+            meaningful.
+          </p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">02</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Action breakdown</h3>
+          <p class="app-copy mt-3 text-sm">
+            Break a goal into ordered actions, then complete or reopen them as plans evolve.
+          </p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">03</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Automatic progress</h3>
+          <p class="app-copy mt-3 text-sm">
+            Goal progress and status stay in sync as actions are completed.
+          </p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">04</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Find what matters</h3>
+          <p class="app-copy mt-3 text-sm">
+            Search, filter, sort and paginate without losing track of the goals you need.
+          </p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">05</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Deadlines in view</h3>
+          <p class="app-copy mt-3 text-sm">
+            Overdue tracking helps surface goals whose target dates need attention.
+          </p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">06</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Your goals stay yours</h3>
+          <p class="app-copy mt-3 text-sm">
+            Authentication and server-side ownership keep each account's goals and actions isolated.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="marketing-section" aria-labelledby="real-life-title">
+    <div class="marketing-container">
+      <div class="editorial-grid">
+        <div class="editorial-photo">
+          <img
+            src="/images/marketing/monday-goals.webp"
+            width="1066"
+            height="1600"
+            alt="Weekly planner with Monday goals and to-do sections"
+            loading="lazy"
+          />
+        </div>
+        <div class="flex flex-col justify-center p-7 sm:p-10 lg:p-14">
+          <p class="app-eyebrow">Calm by design</p>
+          <h2 id="real-life-title" class="marketing-heading mt-4">Designed for real life.</h2>
+          <p class="app-copy mt-5 text-base">
+            A clear planning space should reduce noise, not create more of it. Elevating keeps the
+            structure visible while leaving room for plans to change.
+          </p>
+          <ul class="mt-7 grid gap-4">
+            <li class="support-point">Priorities without clutter</li>
+            <li class="support-point">Progress without manual maths</li>
+            <li class="support-point">Actions that stay connected to the bigger goal</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pb-14 sm:pb-20" aria-labelledby="features-cta-title">
+    <div class="marketing-container">
+      <div class="features-cta px-6 py-10 text-center sm:px-10 sm:py-14">
+        <h2
+          id="features-cta-title"
+          class="marketing-heading marketing-cta-heading mx-auto max-w-2xl"
+        >
+          Start with the goal that matters now.
+        </h2>
+        <div class="mt-7">
+          @if (auth.isAuthenticated()) {
+            <a routerLink="/goals" class="btn-primary">Go to your goals</a>
+          } @else {
+            <a routerLink="/register" class="btn-primary">Get started</a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

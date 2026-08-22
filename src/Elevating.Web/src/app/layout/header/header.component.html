@@ -2,7 +2,13 @@
   <div
     class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
   >
-    <a routerLink="/" class="app-heading text-3xl" aria-label="Elevating goals">Elevating</a>
+    <a routerLink="/goals" class="app-brand" aria-label="Elevating goals">
+      <img src="/brand/elevating-stepped-logo.png" width="46" height="46" alt="" />
+      <span>
+        <strong>ELEVATING</strong>
+        <small>YOUR GOALS</small>
+      </span>
+    </a>
 
     <div class="flex items-center justify-between gap-4 sm:justify-end">
       @if (auth.currentUser(); as user) {

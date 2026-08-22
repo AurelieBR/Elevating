@@ -83,7 +83,22 @@ describe('authentication guards', () => {
 
     const result = runGuestGuard() as UrlTree;
 
-    expect(router.serializeUrl(result)).toBe('/');
+    expect(router.serializeUrl(result)).toBe('/goals');
+  });
+
+  it('waits for startup authentication before resolving a guest route', async () => {
+    const result = runGuestGuard() as Observable<boolean | UrlTree>;
+    const resolved = firstValueFrom(result);
+    let settled = false;
+    void resolved.then(() => (settled = true));
+
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    initialized.next('authenticated');
+    initialized.complete();
+
+    expect(router.serializeUrl((await resolved) as UrlTree)).toBe('/goals');
   });
 
   function runAuthGuard(url: string) {

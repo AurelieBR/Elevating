@@ -58,6 +58,6 @@ export class Login {
 
     return returnUrl !== null && returnUrl.startsWith('/') && !returnUrl.startsWith('//')
       ? returnUrl
-      : '/';
+      : '/goals';
   }
 }

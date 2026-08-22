@@ -74,7 +74,7 @@ export class Register {
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: () => {
-          void this.router.navigateByUrl('/');
+          void this.router.navigateByUrl('/goals');
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage.set(
