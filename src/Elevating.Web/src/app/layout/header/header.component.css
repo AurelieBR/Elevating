@@ -1,3 +1,36 @@
 :host {
   display: block;
 }
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: max-content;
+}
+
+.app-brand img {
+  width: 2.875rem;
+  height: 2.875rem;
+  object-fit: contain;
+}
+
+.app-brand strong,
+.app-brand small {
+  display: block;
+}
+
+.app-brand strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+}
+
+.app-brand small {
+  margin-top: 0.08rem;
+  color: var(--color-sage-hover);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}

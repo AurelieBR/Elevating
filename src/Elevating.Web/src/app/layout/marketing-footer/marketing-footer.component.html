@@ -1,0 +1,36 @@
+<footer class="border-t border-line bg-canvas-deep/70">
+  <div class="marketing-container py-10 sm:py-12">
+    <div class="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+      <div>
+        <a routerLink="/" class="inline-flex items-center gap-3" aria-label="Elevating home">
+          <img
+            src="/brand/elevating-stepped-logo.png"
+            width="48"
+            height="48"
+            alt=""
+            class="h-12 w-12 object-contain"
+          />
+          <span class="font-display text-[1.4rem] font-semibold tracking-[0.15em] text-ink">
+            ELEVATING
+          </span>
+        </a>
+        <p class="app-copy mt-4 max-w-xl text-sm">
+          Plan with intention. Focus on what matters. Grow consistently.
+        </p>
+      </div>
+
+      <nav
+        class="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-ink-soft"
+        aria-label="Footer navigation"
+      >
+        <a routerLink="/">Home</a>
+        <a routerLink="/features">Features</a>
+        <a routerLink="/about">About</a>
+        <a routerLink="/login">Sign in</a>
+        <a routerLink="/register">Get started</a>
+      </nav>
+    </div>
+
+    <p class="mt-9 border-t border-line pt-6 text-xs text-muted">© {{ currentYear }} Elevating</p>
+  </div>
+</footer>

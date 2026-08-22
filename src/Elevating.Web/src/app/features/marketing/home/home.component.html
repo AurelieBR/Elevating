@@ -1,0 +1,161 @@
+<main>
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="marketing-container hero-grid">
+      <div>
+        <p class="app-eyebrow">Plan · Focus · Grow</p>
+        <h1 id="home-title" class="app-heading hero-title mt-5">Elevate your day, every day.</h1>
+        <p class="app-copy mt-6 max-w-xl text-lg sm:text-xl">
+          Plan with intention. Focus on what matters. Grow consistently.
+        </p>
+
+        <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+          @if (auth.isAuthenticated()) {
+            <a routerLink="/goals" class="btn-primary w-full sm:w-auto">Go to your goals</a>
+          } @else {
+            <a routerLink="/register" class="btn-primary w-full sm:w-auto">Get started</a>
+            <a routerLink="/login" class="btn-ghost w-full sm:w-auto">
+              Sign in <span aria-hidden="true">→</span>
+            </a>
+          }
+        </div>
+
+        <div class="mt-7 flex max-w-lg items-center gap-3 border-t border-line pt-5">
+          <img
+            src="/brand/elevating-mark.png"
+            width="32"
+            height="32"
+            alt=""
+            class="h-8 w-8 rounded-xl"
+          />
+          <p class="text-xs leading-5 text-muted">
+            Turn goals into clear actions. Track what matters. Keep moving forward.
+          </p>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <img
+          src="/images/marketing/home-hero.webp"
+          width="1365"
+          height="2047"
+          alt="Notebook, flowers and coffee in warm morning light"
+          class="hero-photo"
+          fetchpriority="high"
+        />
+
+        <article class="preview-card p-5 sm:p-6" aria-label="Static Elevating goal preview">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="app-eyebrow">Today's focus</p>
+              <h2 class="mt-2 font-display text-2xl font-semibold leading-tight text-ink">
+                A calmer morning routine
+              </h2>
+            </div>
+            <span class="rounded-full bg-sage-soft px-2.5 py-1 text-[0.65rem] font-bold text-moss">
+              WELLBEING
+            </span>
+          </div>
+
+          <div class="mt-5 flex items-center justify-between gap-4 text-xs text-muted">
+            <span>3 of 5 actions complete</span>
+            <strong class="text-ink">60%</strong>
+          </div>
+          <div
+            class="preview-progress mt-2"
+            role="progressbar"
+            aria-label="Example goal progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="60"
+          ></div>
+
+          <ul class="mt-5 grid gap-3">
+            <li class="preview-action preview-action-complete">Set tomorrow's first priority</li>
+            <li class="preview-action preview-action-complete">Prepare a simple breakfast</li>
+            <li class="preview-action">Take a screen-free morning walk</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-surface/70" aria-labelledby="pillars-title">
+    <div class="marketing-container py-10 sm:py-14">
+      <h2 id="pillars-title" class="sr-only">A clearer way to make progress</h2>
+      <div class="pillar-grid">
+        <article class="pillar">
+          <span class="pillar-mark" aria-hidden="true">01</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Plan with intention</h3>
+          <p class="app-copy mt-2 text-sm">Set meaningful goals and give them a clear target.</p>
+        </article>
+        <article class="pillar">
+          <span class="pillar-mark" aria-hidden="true">02</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Focus on what matters</h3>
+          <p class="app-copy mt-2 text-sm">
+            Break goals into practical actions you can actually do.
+          </p>
+        </article>
+        <article class="pillar">
+          <span class="pillar-mark" aria-hidden="true">03</span>
+          <h3 class="mt-5 font-display text-2xl font-semibold text-ink">Grow consistently</h3>
+          <p class="app-copy mt-2 text-sm">See progress update as your actions move forward.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="marketing-section" aria-labelledby="how-it-works-title">
+    <div class="marketing-container">
+      <div class="max-w-2xl">
+        <p class="app-eyebrow">How it works</p>
+        <h2 id="how-it-works-title" class="marketing-heading mt-4">
+          A simple structure for meaningful movement.
+        </h2>
+        <p class="app-copy mt-5 text-base">
+          Keep the bigger picture visible while making the next step easier to choose.
+        </p>
+      </div>
+
+      <ol class="steps-grid mt-9">
+        <li class="step-card">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="mt-6 font-display text-2xl font-semibold text-ink">Create a goal</h3>
+          <p class="app-copy mt-3 text-sm">
+            Capture what you want to move toward, with a priority and target date when it helps.
+          </p>
+        </li>
+        <li class="step-card">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="mt-6 font-display text-2xl font-semibold text-ink">Break it into actions</h3>
+          <p class="app-copy mt-3 text-sm">Turn the bigger goal into ordered next steps.</p>
+        </li>
+        <li class="step-card">
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="mt-6 font-display text-2xl font-semibold text-ink">Track the movement</h3>
+          <p class="app-copy mt-3 text-sm">
+            Complete actions and let Elevating keep progress and status in sync.
+          </p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="pb-14 sm:pb-20" aria-labelledby="home-cta-title">
+    <div class="marketing-container">
+      <div class="closing-panel px-6 py-10 sm:px-10 sm:py-14 lg:px-16">
+        <p class="app-eyebrow">Begin with one step</p>
+        <h2 id="home-cta-title" class="marketing-heading marketing-cta-heading mt-4 max-w-2xl">
+          Ready to make the next step clear?
+        </h2>
+        <p class="app-copy mt-4 text-base">Start with one goal. Build from there.</p>
+        <div class="mt-7">
+          @if (auth.isAuthenticated()) {
+            <a routerLink="/goals" class="btn-primary">Go to your goals</a>
+          } @else {
+            <a routerLink="/register" class="btn-primary">Get started</a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,72 @@
+<header class="border-b border-line/80 bg-surface/95 backdrop-blur">
+  <div
+    class="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8"
+  >
+    <a routerLink="/" class="brand-lockup flex items-center gap-3.5" aria-label="Elevating home">
+      <img
+        src="/brand/elevating-stepped-logo.png"
+        width="56"
+        height="56"
+        alt=""
+        class="h-14 w-14 object-contain"
+      />
+      <span>
+        <span class="block font-display text-2xl font-semibold tracking-[0.15em] text-ink">
+          ELEVATING
+        </span>
+        <span class="mt-0.5 block text-[0.625rem] font-semibold tracking-[0.2em] text-sage-hover">
+          PLAN · FOCUS · GROW
+        </span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
+      <a routerLink="/features" routerLinkActive="marketing-link-active" class="marketing-link">
+        Features
+      </a>
+      <a routerLink="/about" routerLinkActive="marketing-link-active" class="marketing-link">
+        About
+      </a>
+    </nav>
+
+    <div class="hidden items-center gap-2 md:flex">
+      @if (auth.isAuthenticated()) {
+        <a routerLink="/goals" class="btn-primary">Your goals</a>
+      } @else {
+        <a routerLink="/login" class="btn-ghost">Sign in</a>
+        <a routerLink="/register" class="btn-primary">Get started</a>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-xl border border-line bg-surface-raised text-ink md:hidden"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="marketing-mobile-menu"
+      [attr.aria-label]="menuOpen() ? 'Close navigation menu' : 'Open navigation menu'"
+      (click)="toggleMenu()"
+    >
+      <span class="menu-bar" aria-hidden="true"></span>
+      <span class="menu-bar" aria-hidden="true"></span>
+      <span class="menu-bar" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  @if (menuOpen()) {
+    <div id="marketing-mobile-menu" class="border-t border-line bg-surface px-4 py-4 md:hidden">
+      <nav class="mx-auto grid max-w-7xl gap-1" aria-label="Mobile navigation">
+        <a routerLink="/features" class="marketing-link" (click)="closeMenu()">Features</a>
+        <a routerLink="/about" class="marketing-link" (click)="closeMenu()">About</a>
+
+        <div class="mt-3 grid gap-2 border-t border-line pt-4">
+          @if (auth.isAuthenticated()) {
+            <a routerLink="/goals" class="btn-primary" (click)="closeMenu()">Your goals</a>
+          } @else {
+            <a routerLink="/login" class="btn-secondary" (click)="closeMenu()">Sign in</a>
+            <a routerLink="/register" class="btn-primary" (click)="closeMenu()">Get started</a>
+          }
+        </div>
+      </nav>
+    </div>
+  }
+</header>

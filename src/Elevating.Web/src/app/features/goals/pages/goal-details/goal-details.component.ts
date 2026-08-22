@@ -207,7 +207,7 @@ export class GoalDetails implements OnInit {
       )
       .subscribe({
         next: () => {
-          void this.router.navigate(['/']);
+          void this.router.navigate(['/goals']);
         },
         error: () => {
           this.notification.set({

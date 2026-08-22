@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 
 import { Goal, GoalPriority, GoalStatus } from '../../models';
 import { GoalDetails } from './goal-details.component';
@@ -10,6 +10,7 @@ describe('GoalDetails', () => {
   let fixture: ComponentFixture<GoalDetails>;
   let component: GoalDetails;
   let httpTestingController: HttpTestingController;
+  let router: Router;
 
   const goal: Goal = {
     id: 1,
@@ -53,6 +54,7 @@ describe('GoalDetails', () => {
     }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
 
     fixture = TestBed.createComponent(GoalDetails);
     component = fixture.componentInstance;
@@ -101,5 +103,19 @@ describe('GoalDetails', () => {
     component.dismissArrivalNotice();
 
     expect(component.arrivalNotice()).toBeNull();
+  });
+
+  it('should return to /goals after deletion', () => {
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.confirmDelete();
+
+    const request = httpTestingController.expectOne(
+      (candidate) =>
+        candidate.method === 'DELETE' && candidate.url.toLowerCase().endsWith('/goals/1'),
+    );
+    request.flush(null);
+
+    expect(router.navigate).toHaveBeenCalledWith(['/goals']);
   });
 });

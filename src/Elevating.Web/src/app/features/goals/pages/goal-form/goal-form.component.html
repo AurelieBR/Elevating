@@ -1,7 +1,7 @@
 <main class="app-page">
   <div class="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
     <a
-      routerLink="/"
+      routerLink="/goals"
       class="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-brand"
     >
       <span aria-hidden="true">←</span>
@@ -81,7 +81,7 @@
             <button type="button" (click)="retryLoad()" class="btn-danger">Try again</button>
           }
 
-          <a routerLink="/" class="btn-secondary"> Return to goals </a>
+          <a routerLink="/goals" class="btn-secondary"> Return to goals </a>
         </div>
       </section>
     } @else {
@@ -251,7 +251,7 @@
         <div
           class="mt-8 flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end"
         >
-          <a routerLink="/" class="btn-secondary"> Cancel </a>
+          <a routerLink="/goals" class="btn-secondary"> Cancel </a>
 
           <button type="submit" [disabled]="saving()" class="btn-primary min-w-36">
             @if (saving()) {
